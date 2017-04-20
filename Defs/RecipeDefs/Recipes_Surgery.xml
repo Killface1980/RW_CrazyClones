@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RecipeDefs>
+
+  <!--================================= abstract base =================================-->
+
+  <RecipeDef Abstract="True" Name="CCSurgeryFlesh">
+    <effectWorking>Surgery</effectWorking>
+    <soundWorking>Recipe_Surgery</soundWorking>
+    <workSpeedStat>MedicalOperationSpeed</workSpeedStat>
+    <workSkill>Medicine</workSkill>
+    <workSkillLearnFactor>16</workSkillLearnFactor>
+  </RecipeDef>
+
+  <!--================================= take blood surgery =================================-->
+
+  <RecipeDef ParentName="CCSurgeryFlesh">
+    <defName>TakeDNASample</defName>
+    <label>take dna sample</label>
+    <description>Take blood</description>
+    <workerClass>RW_CrazyClones.Recipe_TakeBloodSample</workerClass>
+    <jobString>Taking blood sample</jobString>
+    <recipeUsers>
+      <li>Human</li>
+    </recipeUsers>
+    <workAmount>300</workAmount>
+    <hideBodyPartNames>true</hideBodyPartNames>
+    <skillRequirements>
+      <li>
+        <skill>Medicine</skill>
+        <minLevel>5</minLevel>
+      </li>
+    </skillRequirements>
+    <products>
+      <CCBloodBag>5</CCBloodBag>
+    </products>
+    <appliedOnFixedBodyParts>
+      <li>Heart</li>
+    </appliedOnFixedBodyParts>
+   <!-- <addsHediff>CCBloodtaken</addsHediff>-->
+    <addsHediff>BloodLoss</addsHediff>
+  </RecipeDef>
+
+</RecipeDefs>

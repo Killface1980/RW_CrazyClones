@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ThingDefs>
+
+  <!--================================= blood bag =================================-->
+  
+  <ThingDef ParentName="CCResourceBase">
+    <defName>CCBloodBag</defName>
+    <label>Blood Bag</label>
+    <description>Blood bag. Used to take dna samples for cloning.</description>
+    <graphicData>
+      <texPath>Items/BloodBag</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+    </graphicData>
+    <stackLimit>100</stackLimit>
+    <statBases>
+		<MarketValue>5</MarketValue>
+		<Mass>0.25</Mass>
+		<DeteriorationRate>10</DeteriorationRate>
+		<Flammability>1.0</Flammability>
+    </statBases>
+    <thingCategories>
+      <li>BodyPartsNatural</li>
+    </thingCategories>
+    <tickerType>Rare</tickerType>
+    <comps>
+		<li Class="CompProperties_Rottable">
+			<daysToRotStart>10</daysToRotStart>
+			<rotDestroys>true</rotDestroys>
+		</li>
+    </comps>
+  </ThingDef>
+  
+</ThingDefs>
