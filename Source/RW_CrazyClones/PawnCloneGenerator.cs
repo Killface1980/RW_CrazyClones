@@ -75,14 +75,14 @@ namespace RW_CrazyClones
             new CurvePoint(15f, 0f)
         };
 
-        public static Pawn GenerateClonePawn(PawnGenerationRequest request, Pawn donorPawn = null)
+        public static Pawn GenerateClonePawn(PawnGenerationRequest request, CCBloodBag pawnDna)
         {
             request.EnsureNonNullFaction();
             Pawn pawn = null;
 
             if (pawn == null)
             {
-                pawn = GenerateNewNakedClonePawn(donorPawn, ref request);
+                pawn = GenerateNewNakedClonePawn(pawnDna, ref request);
                 if (pawn == null)
                 {
                     return null;
@@ -96,7 +96,7 @@ namespace RW_CrazyClones
             return pawn;
         }
 
-        private static Pawn GenerateNewNakedClonePawn(Pawn donorPawn, ref PawnGenerationRequest request)
+        private static Pawn GenerateNewNakedClonePawn(CCBloodBag pawnDna, ref PawnGenerationRequest request)
         {
             Pawn pawn = null;
             string text = null;
@@ -116,7 +116,7 @@ namespace RW_CrazyClones
                     ignoreScenarioRequirements = true;
                 }
                 PawnGenerationRequest pawnGenerationRequest = request;
-                pawn = DoGenerateNewNakedClonePawn(donorPawn, ref pawnGenerationRequest, out text, ignoreScenarioRequirements);
+                pawn = DoGenerateNewNakedClonePawn(pawnDna, ref pawnGenerationRequest, out text, ignoreScenarioRequirements);
                 if (pawn != null)
                 {
                     request = pawnGenerationRequest;
@@ -127,7 +127,7 @@ namespace RW_CrazyClones
             {
                 Log.Error(string.Concat(new object[]
                 {
-                    "Pawn generation error: ",
+                    "pawnDna generation error: ",
                     text,
                     " Too many tries (",
                     100,
@@ -139,20 +139,20 @@ namespace RW_CrazyClones
             return pawn;
         }
 
-        private static Pawn DoGenerateNewNakedClonePawn(Pawn donorPawn, ref PawnGenerationRequest request, out string error, bool ignoreScenarioRequirements)
+        private static Pawn DoGenerateNewNakedClonePawn(CCBloodBag donorDNA, ref PawnGenerationRequest request, out string error, bool ignoreScenarioRequirements)
         {
             error = null;
-            Pawn pawn = (Pawn)ThingMaker.MakeThing(request.KindDef.race, null);
-            pawnsBeingGenerated.Add(new PawnGenerationStatus(pawn, null));
+            Pawn clonePawn = (Pawn)ThingMaker.MakeThing(request.KindDef.race, null);
+            pawnsBeingGenerated.Add(new PawnGenerationStatus(clonePawn, null));
             Pawn result;
             try
             {
-                pawn.kindDef = request.KindDef;
-                pawn.SetFactionDirect(request.Faction);
-                PawnComponentsUtility.CreateInitialComponents(pawn);
+                clonePawn.kindDef = request.KindDef;
+                clonePawn.SetFactionDirect(request.Faction);
+                PawnComponentsUtility.CreateInitialComponents(clonePawn);
 
                 // Gender
-                pawn.gender = donorPawn.gender;
+                clonePawn.gender = donorDNA.donorPawn.gender;
                 //if (request.FixedGender.HasValue)
                 //{
                 //    clonePawn.gender = request.FixedGender.Value;
@@ -174,63 +174,68 @@ namespace RW_CrazyClones
                 //}
 
                 // Age
-                GenerateRandomCloneAge(pawn, request, donorPawn);
-                pawn.needs.SetInitialLevels();
+                GenerateExactCloneAge(clonePawn, donorDNA);
+                clonePawn.needs.SetInitialLevels();
                 if (!request.Newborn && request.CanGeneratePawnRelations)
                 {
-                    GenerateClonePawnRelations(donorPawn, pawn, ref request);
+                    GenerateClonePawnRelations(donorDNA.donorPawn, clonePawn, ref request);
                 }
-                if (pawn.RaceProps.Humanlike)
+                if (clonePawn.RaceProps.Humanlike)
                 {
-                    pawn.story.melanin = donorPawn.story.melanin;// ((!request.FixedMelanin.HasValue) ? PawnSkinColors.RandomMelanin() : request.FixedMelanin.Value);
-                    pawn.story.crownType = donorPawn.story.crownType;//((Rand.Value >= 0.5f) ? CrownType.Narrow : CrownType.Average);
-                    pawn.story.hairColor = donorPawn.story.hairColor; PawnHairColors.RandomHairColor(pawn.story.SkinColor, pawn.ageTracker.AgeBiologicalYears);
+                    clonePawn.story.melanin = donorDNA.melanin;// ((!request.FixedMelanin.HasValue) ? PawnSkinColors.RandomMelanin() : request.FixedMelanin.Value);
+                    clonePawn.story.crownType = donorDNA.crownType;//((Rand.Value >= 0.5f) ? CrownType.Narrow : CrownType.Average);
+                    clonePawn.story.hairColor = donorDNA.hairColor;
+                  //  PawnHairColors.RandomHairColor(clonePawn.story.SkinColor, clonePawn.ageTracker.AgeBiologicalYears);
                     //to do: Bio
-                    GiveAppropriateBioAndNameTo(donorPawn, pawn, request.FixedLastName);
-                    pawn.story.childhood = donorPawn.story.childhood;
-                    pawn.story.childhood = donorPawn.story.adulthood;
-                    pawn.story.hairDef = donorPawn.story.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
-                    GenerateTraits(donorPawn, pawn, request.AllowGay);
-                    GenerateBodyType(donorPawn, pawn);
-                    GenerateSkills(donorPawn, pawn);
+                    //GiveAppropriateBioAndNameTo(pawnDna, clonePawn, request.FixedLastName);
+                    clonePawn.Name = donorDNA.Name;
+                    clonePawn.story.childhood = donorDNA.childhood;
+                    clonePawn.story.adulthood = donorDNA.adulthood;
+                    clonePawn.story.hairDef = donorDNA.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
+                    clonePawn.story.traits = donorDNA.traits;
+                    PassTraitsFromDonor(donorDNA, clonePawn);
+                    GenerateBodyType(donorDNA, clonePawn);
+                    clonePawn.skills = donorDNA.skills;
+                //    GenerateSkills(donorDNA, clonePawn);
                 }
                 //To Do: Rewrite
-                GenerateInitialHediffs(pawn, request);
-                if (pawn.workSettings != null && request.Faction.IsPlayer)
+            
+                // GenerateInitialHediffs(clonePawn, request);
+                if (clonePawn.workSettings != null && request.Faction.IsPlayer)
                 {
-                    pawn.workSettings.EnableAndInitialize();
+                    clonePawn.workSettings.EnableAndInitialize();
                 }
-                if (request.Faction != null && pawn.RaceProps.Animal)
+                if (request.Faction != null && clonePawn.RaceProps.Animal)
                 {
-                    pawn.GenerateNecessaryName();
+                    clonePawn.GenerateNecessaryName();
                 }
-                if (!request.AllowDead && (pawn.Dead || pawn.Destroyed))
+                if (!request.AllowDead && (clonePawn.Dead || clonePawn.Destroyed))
                 {
-                    DiscardGeneratedPawn(pawn);
+                    DiscardGeneratedPawn(clonePawn);
                     error = "Generated dead clonePawn.";
                     result = null;
                 }
-                else if (!request.AllowDowned && pawn.Downed)
+                else if (!request.AllowDowned && clonePawn.Downed)
                 {
-                    DiscardGeneratedPawn(pawn);
+                    DiscardGeneratedPawn(clonePawn);
                     error = "Generated downed clonePawn.";
                     result = null;
                 }
-                else if (request.MustBeCapableOfViolence && pawn.story != null && pawn.story.WorkTagIsDisabled(WorkTags.Violent))
+                else if (request.MustBeCapableOfViolence && clonePawn.story != null && clonePawn.story.WorkTagIsDisabled(WorkTags.Violent))
                 {
-                    DiscardGeneratedPawn(pawn);
+                    DiscardGeneratedPawn(clonePawn);
                     error = "Generated clonePawn incapable of violence.";
                     result = null;
                 }
-                else if (!ignoreScenarioRequirements && request.Context == PawnGenerationContext.PlayerStarter && !Find.Scenario.AllowPlayerStartingPawn(pawn))
+                else if (!ignoreScenarioRequirements && request.Context == PawnGenerationContext.PlayerStarter && !Find.Scenario.AllowPlayerStartingPawn(clonePawn))
                 {
-                    DiscardGeneratedPawn(pawn);
+                    DiscardGeneratedPawn(clonePawn);
                     error = "Generated clonePawn doesn't meet scenario requirements.";
                     result = null;
                 }
-                else if (request.Validator != null && !request.Validator(pawn))
+                else if (request.Validator != null && !request.Validator(clonePawn))
                 {
-                    DiscardGeneratedPawn(pawn);
+                    DiscardGeneratedPawn(clonePawn);
                     error = "Generated clonePawn didn't pass validator check.";
                     result = null;
                 }
@@ -242,9 +247,9 @@ namespace RW_CrazyClones
                         {
                             pawnsBeingGenerated[i] = new PawnGenerationStatus(pawnsBeingGenerated[i].Pawn, new List<Pawn>());
                         }
-                        pawnsBeingGenerated[i].PawnsGeneratedInTheMeantime.Add(pawn);
+                        pawnsBeingGenerated[i].PawnsGeneratedInTheMeantime.Add(clonePawn);
                     }
-                    result = pawn;
+                    result = clonePawn;
                 }
             }
             finally
@@ -295,22 +300,6 @@ namespace RW_CrazyClones
             return 1f;
         }
 
-        private static void GenerateGearFor(Pawn pawn, PawnGenerationRequest request)
-        {
-            ProfilerThreadCheck.BeginSample("GenerateGearFor");
-            ProfilerThreadCheck.BeginSample("GenerateStartingApparelFor");
-            PawnApparelGenerator.GenerateStartingApparelFor(pawn, request);
-            ProfilerThreadCheck.EndSample();
-            ProfilerThreadCheck.BeginSample("TryGenerateWeaponFor");
-            PawnWeaponGenerator.TryGenerateWeaponFor(pawn);
-            ProfilerThreadCheck.EndSample();
-            ProfilerThreadCheck.BeginSample("GenerateInventoryFor");
-            PawnInventoryGenerator.GenerateInventoryFor(pawn, request);
-            ProfilerThreadCheck.EndSample();
-            ProfilerThreadCheck.EndSample();
-        }
-
-
         private static void GenerateInitialHediffs(Pawn pawn, PawnGenerationRequest request)
         {
             int num = 0;
@@ -349,123 +338,11 @@ namespace RW_CrazyClones
             }));
         }
 
-        private static void GenerateRandomCloneAge(Pawn pawn, PawnGenerationRequest request, Pawn donorPawn)
+        private static void GenerateExactCloneAge(Pawn clonePawn, CCBloodBag donorDNA)
         {
-            pawn.ageTracker.AgeBiologicalTicks = donorPawn.ageTracker.AgeBiologicalTicks +
-                                                 (long)Rand.Range(-donorPawn.ageTracker.AgeBiologicalTicks / 3,
-                                                     donorPawn.ageTracker.AgeBiologicalTicks / 3);
-            return;
+            clonePawn.ageTracker.AgeBiologicalTicks = donorDNA.AgeBiologicalTicks;//pawnDna.ageTracker.AgeBiologicalTicks;
+            clonePawn.ageTracker.AgeChronologicalTicks = 0L;// donorDNA.AgeChronologicalTicks;
 
-            if (request.FixedBiologicalAge.HasValue && request.FixedChronologicalAge.HasValue)
-            {
-                float? fixedBiologicalAge = request.FixedBiologicalAge;
-                bool arg_67_0;
-                if (fixedBiologicalAge.HasValue)
-                {
-                    float? fixedChronologicalAge = request.FixedChronologicalAge;
-                    if (fixedChronologicalAge.HasValue)
-                    {
-                        arg_67_0 = (fixedBiologicalAge.Value > fixedChronologicalAge.Value);
-                        goto IL_67;
-                    }
-                }
-                arg_67_0 = false;
-                IL_67:
-                if (arg_67_0)
-                {
-                    Log.Warning(string.Concat(new object[]
-                    {
-                        "Tried to generate age for clonePawn ",
-                        pawn,
-                        ", but clonePawn generation request demands biological age (",
-                        request.FixedBiologicalAge,
-                        ") to be greater than chronological age (",
-                        request.FixedChronologicalAge,
-                        ")."
-                    }));
-                }
-            }
-            if (request.Newborn)
-            {
-                pawn.ageTracker.AgeBiologicalTicks = 0L;
-            }
-            else if (request.FixedBiologicalAge.HasValue)
-            {
-                pawn.ageTracker.AgeBiologicalTicks = (long)(request.FixedBiologicalAge.Value * 3600000f);
-            }
-            else
-            {
-                int num = 0;
-                float num2;
-                while (true)
-                {
-                    if (pawn.RaceProps.ageGenerationCurve != null)
-                    {
-                        num2 = (float)Mathf.RoundToInt(Rand.ByCurve(pawn.RaceProps.ageGenerationCurve, 200));
-                    }
-                    else if (pawn.RaceProps.IsMechanoid)
-                    {
-                        num2 = (float)Rand.Range(0, 2500);
-                    }
-                    else
-                    {
-                        num2 = Rand.ByCurve(DefaultAgeGenerationCurve, 200) * pawn.RaceProps.lifeExpectancy;
-                    }
-                    num++;
-                    if (num > 300)
-                    {
-                        break;
-                    }
-                    if (num2 <= (float)pawn.kindDef.maxGenerationAge && num2 >= (float)pawn.kindDef.minGenerationAge)
-                    {
-                        goto IL_1DB;
-                    }
-                }
-                Log.Error("Tried 300 times to generate age for " + pawn);
-                IL_1DB:
-                pawn.ageTracker.AgeBiologicalTicks = (long)(num2 * 3600000f) + (long)Rand.Range(0, 3600000);
-            }
-            if (request.Newborn)
-            {
-                pawn.ageTracker.AgeChronologicalTicks = 0L;
-            }
-            else if (request.FixedChronologicalAge.HasValue)
-            {
-                pawn.ageTracker.AgeChronologicalTicks = (long)(request.FixedChronologicalAge.Value * 3600000f);
-            }
-            else
-            {
-                int num3;
-                if (Rand.Value < pawn.kindDef.backstoryCryptosleepCommonality)
-                {
-                    float value = Rand.Value;
-                    if (value < 0.7f)
-                    {
-                        num3 = Rand.Range(0, 100);
-                    }
-                    else if (value < 0.95f)
-                    {
-                        num3 = Rand.Range(100, 1000);
-                    }
-                    else
-                    {
-                        int max = GenDate.Year((long)GenTicks.TicksAbs, 0f) - 2026 - pawn.ageTracker.AgeBiologicalYears;
-                        num3 = Rand.Range(1000, max);
-                    }
-                }
-                else
-                {
-                    num3 = 0;
-                }
-                int ticksAbs = GenTicks.TicksAbs;
-                long num4 = (long)ticksAbs - pawn.ageTracker.AgeBiologicalTicks;
-                num4 -= (long)num3 * 3600000L;
-                pawn.ageTracker.BirthAbsTicks = num4;
-            }
-            if (pawn.ageTracker.AgeBiologicalTicks > pawn.ageTracker.AgeChronologicalTicks)
-            {
-                pawn.ageTracker.AgeChronologicalTicks = pawn.ageTracker.AgeBiologicalTicks;
-            }
         }
 
         public static int RandomTraitDegree(TraitDef traitDef)
@@ -477,107 +354,29 @@ namespace RW_CrazyClones
             return traitDef.degreeDatas.RandomElementByWeight((TraitDegreeData dd) => dd.Commonality).degree;
         }
 
-        private static void GenerateTraits(Pawn donorPawn, Pawn pawn, bool allowGay)
+        private static void PassTraitsFromDonor(CCBloodBag donorPawn, Pawn pawn)
         {
-            if (pawn.story == null)
+            if (donorPawn == null || pawn.story== null)
             {
                 return;
             }
-            pawn.story.traits = donorPawn.story.traits;
+            pawn.story.traits = donorPawn.traits;
             return;
-
-            if (pawn.story.childhood.forcedTraits != null)
-            {
-                List<TraitEntry> forcedTraits = pawn.story.childhood.forcedTraits;
-                for (int i = 0; i < forcedTraits.Count; i++)
-                {
-                    TraitEntry traitEntry = forcedTraits[i];
-                    if (traitEntry.def == null)
-                    {
-                        Log.Error("Null forced trait def on " + pawn.story.childhood);
-                    }
-                    else if (!pawn.story.traits.HasTrait(traitEntry.def))
-                    {
-                        pawn.story.traits.GainTrait(new Trait(traitEntry.def, traitEntry.degree, false));
-                    }
-                }
-            }
-            if (pawn.story.adulthood != null && pawn.story.adulthood.forcedTraits != null)
-            {
-                List<TraitEntry> forcedTraits2 = pawn.story.adulthood.forcedTraits;
-                for (int j = 0; j < forcedTraits2.Count; j++)
-                {
-                    TraitEntry traitEntry2 = forcedTraits2[j];
-                    if (traitEntry2.def == null)
-                    {
-                        Log.Error("Null forced trait def on " + pawn.story.adulthood);
-                    }
-                    else if (!pawn.story.traits.HasTrait(traitEntry2.def))
-                    {
-                        pawn.story.traits.GainTrait(new Trait(traitEntry2.def, traitEntry2.degree, false));
-                    }
-                }
-            }
-            int num = Rand.RangeInclusive(2, 3);
-            if (allowGay && (LovePartnerRelationUtility.HasAnyLovePartnerOfTheSameGender(pawn) || LovePartnerRelationUtility.HasAnyExLovePartnerOfTheSameGender(pawn)))
-            {
-                Trait trait = new Trait(TraitDefOf.Gay, RandomTraitDegree(TraitDefOf.Gay), false);
-                pawn.story.traits.GainTrait(trait);
-            }
-            while (pawn.story.traits.allTraits.Count < num)
-            {
-                TraitDef newTraitDef = DefDatabase<TraitDef>.AllDefsListForReading.RandomElementByWeight((TraitDef tr) => tr.GetGenderSpecificCommonality(pawn));
-                if (!pawn.story.traits.HasTrait(newTraitDef))
-                {
-                    if (newTraitDef == TraitDefOf.Gay)
-                    {
-                        if (!allowGay)
-                        {
-                            continue;
-                        }
-                        if (LovePartnerRelationUtility.HasAnyLovePartnerOfTheOppositeGender(pawn) || LovePartnerRelationUtility.HasAnyExLovePartnerOfTheOppositeGender(pawn))
-                        {
-                            continue;
-                        }
-                    }
-                    if (!pawn.story.traits.allTraits.Any((Trait tr) => newTraitDef.ConflictsWith(tr)) && (newTraitDef.conflictingTraits == null || !Enumerable.Any(newTraitDef.conflictingTraits, (TraitDef tr) => pawn.story.traits.HasTrait(tr))))
-                    {
-                        if (newTraitDef.requiredWorkTypes == null || !pawn.story.OneOfWorkTypesIsDisabled(newTraitDef.requiredWorkTypes))
-                        {
-                            if (!pawn.story.WorkTagIsDisabled(newTraitDef.requiredWorkTags))
-                            {
-                                int degree = RandomTraitDegree(newTraitDef);
-                                if (!pawn.story.childhood.DisallowsTrait(newTraitDef, degree) && (pawn.story.adulthood == null || !pawn.story.adulthood.DisallowsTrait(newTraitDef, degree)))
-                                {
-                                    Trait trait2 = new Trait(newTraitDef, degree, false);
-                                    if (pawn.mindState == null || pawn.mindState.mentalBreaker == null || pawn.mindState.mentalBreaker.BreakThresholdExtreme + trait2.OffsetOfStat(StatDefOf.MentalBreakThreshold) <= 40f)
-                                    {
-                                        pawn.story.traits.GainTrait(trait2);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
-        private static void GenerateBodyType(Pawn donorPawn, Pawn pawn)
+        private static void GenerateBodyType(CCBloodBag donorPawn, Pawn clonePawn)
         {
-            pawn.story.bodyType = donorPawn.story.bodyType;
-            return;
-
-            if (pawn.story.adulthood != null)
+            if (donorPawn.adulthood != null)
             {
-                pawn.story.bodyType = pawn.story.adulthood.BodyTypeFor(pawn.gender);
+                clonePawn.story.bodyType = clonePawn.story.adulthood.BodyTypeFor(clonePawn.gender);
             }
             else if (Rand.Value < 0.5f)
             {
-                pawn.story.bodyType = BodyType.Thin;
+                clonePawn.story.bodyType = BodyType.Thin;
             }
             else
             {
-                pawn.story.bodyType = ((pawn.gender != Gender.Female) ? BodyType.Male : BodyType.Female);
+                clonePawn.story.bodyType = ((clonePawn.gender != Gender.Female) ? BodyType.Male : BodyType.Female);
             }
         }
 
@@ -679,9 +478,9 @@ namespace RW_CrazyClones
             IEnumerable<Pawn> enumerable = from x in PawnsFinder.AllMapsAndWorld_AliveOrDead
                                            where x.def == donorPawn.def
                                            select x;
-            clonePawn.relations.AddDirectRelation(DefDatabase<PawnRelationDef>.GetNamed("CloneParent"), donorPawn);
-            donorPawn.relations.AddDirectRelation(DefDatabase<PawnRelationDef>.GetNamed("CloneChild"), clonePawn);
-            //foreach (Pawn current in enumerable)
+            clonePawn.relations.AddDirectRelation(ClonePawnRelationDefOf.CloneParent, donorPawn);
+            donorPawn.relations.AddDirectRelation(ClonePawnRelationDefOf.CloneChild, clonePawn);
+            //foreach (pawnDna current in enumerable)
             //{
             //    if (current.Discarded)
             //    {
@@ -689,7 +488,7 @@ namespace RW_CrazyClones
             //        {
             //            "Warning during generating clonePawn relations for ",
             //            clonePawn,
-            //            ": Pawn ",
+            //            ": pawnDna ",
             //            current,
             //            " is discarded, yet he was yielded by PawnUtility. Discarding a clonePawn means that he is no longer managed by anything."
             //        }));
@@ -700,13 +499,13 @@ namespace RW_CrazyClones
             //        {
             //            if (allDefsListForReading[i].generationChanceFactor > 0f)
             //            {
-            //                list.Add(new KeyValuePair<Pawn, PawnRelationDef>(current, allDefsListForReading[i]));
+            //                list.Add(new KeyValuePair<pawnDna, PawnRelationDef>(current, allDefsListForReading[i]));
             //            }
             //        }
             //    }
             //}
             //PawnGenerationRequest localReq = request;
-            //KeyValuePair<Pawn, PawnRelationDef> keyValuePair = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<Pawn, PawnRelationDef> x)
+            //KeyValuePair<pawnDna, PawnRelationDef> keyValuePair = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<pawnDna, PawnRelationDef> x)
             //{
             //    if (!x.Value.familyByBloodRelation)
             //    {
@@ -718,7 +517,7 @@ namespace RW_CrazyClones
             //{
             //    keyValuePair.Value.Worker.CreateRelation(clonePawn, keyValuePair.Key, ref request);
             //}
-            //KeyValuePair<Pawn, PawnRelationDef> keyValuePair2 = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<Pawn, PawnRelationDef> x)
+            //KeyValuePair<pawnDna, PawnRelationDef> keyValuePair2 = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<pawnDna, PawnRelationDef> x)
             //{
             //    if (x.Value.familyByBloodRelation)
             //    {
@@ -826,10 +625,10 @@ namespace RW_CrazyClones
 
         public static void GiveAppropriateBioAndNameTo(Pawn donorPawn, Pawn pawn, string requiredLastName)
         {
-          //if ((Rand.Value < 0.25f || pawn.kindDef.factionLeader) && TryGiveSolidBioTo(pawn, requiredLastName))
-          //{
-          //    return;
-          //}
+          if ((Rand.Value < 0.25f || pawn.kindDef.factionLeader) && TryGiveSolidBioTo(pawn, requiredLastName))
+          {
+              return;
+          }
             GiveShuffledBioTo(donorPawn, pawn, pawn.Faction.def, requiredLastName);
         }
 
@@ -837,10 +636,8 @@ namespace RW_CrazyClones
         private static void GiveShuffledBioTo(Pawn donorPawn, Pawn clonePawn, FactionDef factionType, string requiredLastName)
         {
             // To do: proper clonePawn names
-            clonePawn.Name = donorPawn.Name;// PawnBioAndNameGenerator.GeneratePawnName(clonePawn, NameStyle.Full, requiredLastName);
-            clonePawn.story.childhood = donorPawn.story.childhood;
-            clonePawn.story.adulthood = donorPawn.story.adulthood;
-            return;
+             PawnBioAndNameGenerator.GeneratePawnName(clonePawn, NameStyle.Full, requiredLastName);
+
             SetBackstoryInSlot(clonePawn, BackstorySlot.Childhood, ref clonePawn.story.childhood, factionType);
             if (clonePawn.ageTracker.AgeBiologicalYearsFloat >= 20f)
             {

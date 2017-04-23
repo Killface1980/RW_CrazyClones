@@ -42,7 +42,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="CCBloodBag.cs" />
+    <Compile Include="PawnRelationWorker_CloneSibling.cs" />
+    <Compile Include="PawnRelationWorker_CloneChild.cs" />
+    <Compile Include="CloneParentRelationUtility.cs" />
+    <Compile Include="ClonePawnRelationDefOf.cs" />
     <Compile Include="Recipe_TakeBloodSample.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="PawnCloneGenerator.cs" />
@@ -51,8 +55,13 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="..\..\Defs\PawnRelationDefs\CCPawnRelations_FamilyByBlood.xml">
+      <Link>Defs\CCPawnRelations_FamilyByBlood.xml</Link>
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="..\..\Defs\RecipeDefs\Recipes_Surgery.xml">
       <Link>Defs\Recipes_Surgery.xml</Link>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="..\..\Defs\ThingDefs_Items\Items_Base.xml">
       <Link>Defs\Items_Base.xml</Link>

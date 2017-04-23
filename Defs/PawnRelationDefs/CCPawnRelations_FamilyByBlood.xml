@@ -22,10 +22,10 @@
   </PawnRelationDef>
   
   <PawnRelationDef>
-    <workerClass>PawnRelationWorker_Child</workerClass>
+    <workerClass>RW_CrazyClones.PawnRelationWorker_CloneChild</workerClass>
     <defName>CloneChild</defName>
-    <label>clone son</label>
-    <labelFemale>clone daughter</labelFemale>
+    <label>male clone of me</label>
+    <labelFemale>female clone of me</labelFemale>
     <importance>190</importance>
     <diedThought>MySonDied</diedThought>
     <diedThoughtFemale>MyDaughterDied</diedThoughtFemale>
@@ -41,7 +41,7 @@
   </PawnRelationDef>
   
   <PawnRelationDef>
-    <workerClass>PawnRelationWorker_Sibling</workerClass>
+    <workerClass>RW_CrazyClones.PawnRelationWorker_CloneSibling</workerClass>
     <defName>CloneSibling</defName>
     <label>clone brother</label>
     <labelFemale>clone sister</labelFemale>

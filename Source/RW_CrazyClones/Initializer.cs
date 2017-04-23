@@ -15,7 +15,7 @@ namespace RW_CrazyClones
         {
 
             PawnGenerationRequest request = new PawnGenerationRequest(bag.donorPawn.kindDef, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, false, true, false, 20f, false, true, true, null, null, null, null, null, null);
-            Pawn generatePawn = PawnCloneGenerator.GenerateClonePawn(request, bag.donorPawn);
+            Pawn generatePawn = PawnCloneGenerator.GenerateClonePawn(request, bag);
 
             GenSpawn.Spawn(generatePawn, bag.Position.RandomAdjacentCell8Way(), bag.Map);
             string text = "WandererJoin".Translate(new object[]
