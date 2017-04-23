@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using RW_FacialStuff;
 using UnityEngine;
 using Verse;
 
@@ -75,7 +76,7 @@ namespace RW_CrazyClones
             new CurvePoint(15f, 0f)
         };
 
-        public static Pawn GenerateClonePawn(PawnGenerationRequest request, CCBloodBag pawnDna)
+        public static Pawn GenerateClonePawn(PawnGenerationRequest request, DNA_Blueprint pawnDna)
         {
             request.EnsureNonNullFaction();
             Pawn pawn = null;
@@ -96,7 +97,7 @@ namespace RW_CrazyClones
             return pawn;
         }
 
-        private static Pawn GenerateNewNakedClonePawn(CCBloodBag pawnDna, ref PawnGenerationRequest request)
+        private static Pawn GenerateNewNakedClonePawn(DNA_Blueprint pawnDna, ref PawnGenerationRequest request)
         {
             Pawn pawn = null;
             string text = null;
@@ -139,10 +140,10 @@ namespace RW_CrazyClones
             return pawn;
         }
 
-        private static Pawn DoGenerateNewNakedClonePawn(CCBloodBag donorDNA, ref PawnGenerationRequest request, out string error, bool ignoreScenarioRequirements)
+        private static Pawn DoGenerateNewNakedClonePawn(DNA_Blueprint dnaBlueprint, ref PawnGenerationRequest request, out string error, bool ignoreScenarioRequirements)
         {
             error = null;
-            Pawn clonePawn = (Pawn)ThingMaker.MakeThing(request.KindDef.race, null);
+            Pawn clonePawn = (Pawn)ThingMaker.MakeThing(dnaBlueprint.pawnKind.race, null);
             pawnsBeingGenerated.Add(new PawnGenerationStatus(clonePawn, null));
             Pawn result;
             try
@@ -152,7 +153,7 @@ namespace RW_CrazyClones
                 PawnComponentsUtility.CreateInitialComponents(clonePawn);
 
                 // Gender
-                clonePawn.gender = donorDNA.donorPawn.gender;
+                clonePawn.gender = dnaBlueprint.donorPawn.gender;
                 //if (request.FixedGender.HasValue)
                 //{
                 //    clonePawn.gender = request.FixedGender.Value;
@@ -174,29 +175,46 @@ namespace RW_CrazyClones
                 //}
 
                 // Age
-                GenerateExactCloneAge(clonePawn, donorDNA);
+                GenerateExactCloneAge(clonePawn, dnaBlueprint);
                 clonePawn.needs.SetInitialLevels();
                 if (!request.Newborn && request.CanGeneratePawnRelations)
                 {
-                    GenerateClonePawnRelations(donorDNA.donorPawn, clonePawn, ref request);
+                    GenerateClonePawnRelations(dnaBlueprint.donorPawn, clonePawn, ref request);
                 }
                 if (clonePawn.RaceProps.Humanlike)
                 {
-                    clonePawn.story.melanin = donorDNA.melanin;// ((!request.FixedMelanin.HasValue) ? PawnSkinColors.RandomMelanin() : request.FixedMelanin.Value);
-                    clonePawn.story.crownType = donorDNA.crownType;//((Rand.Value >= 0.5f) ? CrownType.Narrow : CrownType.Average);
-                    clonePawn.story.hairColor = donorDNA.hairColor;
+                    clonePawn.story.melanin = dnaBlueprint.melanin;// ((!request.FixedMelanin.HasValue) ? PawnSkinColors.RandomMelanin() : request.FixedMelanin.Value);
+                    clonePawn.story.crownType = dnaBlueprint.crownType;//((Rand.Value >= 0.5f) ? CrownType.Narrow : CrownType.Average);
+                    clonePawn.story.hairColor = dnaBlueprint.hairColor;
                   //  PawnHairColors.RandomHairColor(clonePawn.story.SkinColor, clonePawn.ageTracker.AgeBiologicalYears);
                     //to do: Bio
                     //GiveAppropriateBioAndNameTo(pawnDna, clonePawn, request.FixedLastName);
-                    clonePawn.Name = donorDNA.Name;
-                    clonePawn.story.childhood = donorDNA.childhood;
-                    clonePawn.story.adulthood = donorDNA.adulthood;
-                    clonePawn.story.hairDef = donorDNA.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
-                    clonePawn.story.traits = donorDNA.traits;
-                    PassTraitsFromDonor(donorDNA, clonePawn);
-                    GenerateBodyType(donorDNA, clonePawn);
-                    clonePawn.skills = donorDNA.skills;
-                //    GenerateSkills(donorDNA, clonePawn);
+                    clonePawn.Name = dnaBlueprint.Name;
+                    clonePawn.story.childhood = dnaBlueprint.childhood;
+                    clonePawn.story.adulthood = dnaBlueprint.adulthood;
+                    clonePawn.story.hairDef = dnaBlueprint.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
+                    clonePawn.story.traits = dnaBlueprint.traits;
+
+                    //FS
+                    CompFace faceComp = clonePawn.TryGetComp<CompFace>();
+
+                    faceComp.BeardDef = dnaBlueprint.BeardDef;
+                    faceComp.EyeDef = dnaBlueprint.EyeDef;
+                    faceComp.BrowDef = dnaBlueprint.BrowDef;
+                    faceComp.MouthDef = dnaBlueprint.MouthDef;
+                    faceComp.WrinkleDef = dnaBlueprint.WrinkleDef;
+                    faceComp.headGraphicIndex = dnaBlueprint.headGraphicIndex;
+                    faceComp.type = dnaBlueprint.type;
+                    faceComp.SkinColorHex = dnaBlueprint.SkinColorHex;
+                    faceComp.HairColorOrg = dnaBlueprint.HairColorOrg;
+                    faceComp.drawMouth = dnaBlueprint.drawMouth;                    
+                    faceComp.optimized = dnaBlueprint.optimized;
+                    // FS end
+
+                    PassTraitsFromDonor(dnaBlueprint, clonePawn);
+                    GenerateBodyType(dnaBlueprint, clonePawn);
+                    clonePawn.skills = dnaBlueprint.skills;
+                //    GenerateSkills(dnaBlueprint, clonePawn);
                 }
                 //To Do: Rewrite
             
@@ -338,10 +356,10 @@ namespace RW_CrazyClones
             }));
         }
 
-        private static void GenerateExactCloneAge(Pawn clonePawn, CCBloodBag donorDNA)
+        private static void GenerateExactCloneAge(Pawn clonePawn, DNA_Blueprint donorDNA)
         {
             clonePawn.ageTracker.AgeBiologicalTicks = donorDNA.AgeBiologicalTicks;//pawnDna.ageTracker.AgeBiologicalTicks;
-            clonePawn.ageTracker.AgeChronologicalTicks = 0L;// donorDNA.AgeChronologicalTicks;
+            clonePawn.ageTracker.AgeChronologicalTicks = 0L;// dnaBlueprint.AgeChronologicalTicks;
 
         }
 
@@ -354,7 +372,7 @@ namespace RW_CrazyClones
             return traitDef.degreeDatas.RandomElementByWeight((TraitDegreeData dd) => dd.Commonality).degree;
         }
 
-        private static void PassTraitsFromDonor(CCBloodBag donorPawn, Pawn pawn)
+        private static void PassTraitsFromDonor(DNA_Blueprint donorPawn, Pawn pawn)
         {
             if (donorPawn == null || pawn.story== null)
             {
@@ -364,7 +382,7 @@ namespace RW_CrazyClones
             return;
         }
 
-        private static void GenerateBodyType(CCBloodBag donorPawn, Pawn clonePawn)
+        private static void GenerateBodyType(DNA_Blueprint donorPawn, Pawn clonePawn)
         {
             if (donorPawn.adulthood != null)
             {

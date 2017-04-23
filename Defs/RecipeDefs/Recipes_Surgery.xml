@@ -15,28 +15,48 @@
 
   <RecipeDef ParentName="CCSurgeryFlesh">
     <defName>TakeDNASample</defName>
-    <label>take dna sample</label>
-    <description>Take blood</description>
+    <label>take DNA sample</label>
+    <description>Take DNA sample</description>
     <workerClass>RW_CrazyClones.Recipe_TakeBloodSample</workerClass>
     <jobString>Taking blood sample</jobString>
-    <recipeUsers>
-      <li>Human</li>
-    </recipeUsers>
     <workAmount>300</workAmount>
     <hideBodyPartNames>true</hideBodyPartNames>
+    <recipeUsers>
+      <li>Human</li>
+      <li>YorkshireTerrier</li>
+      <li>Husky</li>
+      <li>LabradorRetriever</li>
+      <li>Cat</li>
+    </recipeUsers>
+    <ingredients>
+      <li>
+        <filter>
+          <categories>
+            <li>Medicine</li>
+          </categories>
+        </filter>
+        <count>3</count>
+      </li>
+    </ingredients>
+    <fixedIngredientFilter>
+      <categories>
+        <li>Medicine</li>
+      </categories>
+      <!--     <exceptedThingDefs>
+        <li>HerbalMedicine</li>
+      </exceptedThingDefs>
+   -->
+    </fixedIngredientFilter>
     <skillRequirements>
       <li>
         <skill>Medicine</skill>
         <minLevel>5</minLevel>
       </li>
     </skillRequirements>
-    <!--<products>
-      <CCBloodBag>5</CCBloodBag>
-    </products>-->
     <appliedOnFixedBodyParts>
       <li>Heart</li>
     </appliedOnFixedBodyParts>
-    <addsHediff>CCBloodtaken</addsHediff>
+    <addsHediff>DNASampleTaken</addsHediff>
   </RecipeDef>
 
 </RecipeDefs>

@@ -24,8 +24,8 @@
   <PawnRelationDef>
     <workerClass>RW_CrazyClones.PawnRelationWorker_CloneChild</workerClass>
     <defName>CloneChild</defName>
-    <label>male clone of me</label>
-    <labelFemale>female clone of me</labelFemale>
+    <label>♂ clone of me</label>
+    <labelFemale>♀ clone of me</labelFemale>
     <importance>190</importance>
     <diedThought>MySonDied</diedThought>
     <diedThoughtFemale>MyDaughterDied</diedThoughtFemale>

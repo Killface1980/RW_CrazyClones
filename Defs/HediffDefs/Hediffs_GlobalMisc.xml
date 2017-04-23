@@ -6,8 +6,8 @@
   </HediffDef>
   
   <HediffDef ParentName="CCDiseaseBase">
-    <defName>CCBloodtaken</defName>
-    <label>Blood taken</label>
+    <defName>DNASampleTaken</defName>
+    <label>DNA sample taken</label>
     <comps>
       <li Class="HediffCompProperties_Disappears">
         <disappearsAfterTicks>

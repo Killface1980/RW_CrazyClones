@@ -46,13 +46,13 @@ namespace RW_CrazyClones
             return num * num2 * num4 * base.BaseGenerationChanceFactor(generated, other, request);
         }
 
-        public override void CreateRelation(Pawn generated, Pawn other, ref PawnGenerationRequest request)
+        public override void CreateRelation(Pawn clonePawn, Pawn other, ref PawnGenerationRequest request)
         {
-            Pawn cloneParent = generated.GetCloneParent();
+            Pawn cloneParent = clonePawn.GetCloneParent();
 
             if (cloneParent != null && cloneParent == other.GetCloneParent())
             {
-                generated.relations.AddDirectRelation(ClonePawnRelationDefOf.CloneSibling, other);
+                clonePawn.relations.AddDirectRelation(ClonePawnRelationDefOf.CloneSibling, other);
             }
         }
 

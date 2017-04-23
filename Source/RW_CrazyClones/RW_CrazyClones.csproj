@@ -35,6 +35,10 @@
       <HintPath>..\..\..\..\RimWorldWin_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="RW_FacialStuff">
+      <HintPath>..\..\..\RW_FacialStuff\Assemblies\RW_FacialStuff.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\RimWorldWin_Data\Managed\UnityEngine.dll</HintPath>
@@ -43,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CCBloodBag.cs" />
+    <Compile Include="DNA_Blueprint.cs" />
     <Compile Include="PawnRelationWorker_CloneSibling.cs" />
     <Compile Include="PawnRelationWorker_CloneChild.cs" />
     <Compile Include="CloneParentRelationUtility.cs" />
@@ -55,6 +60,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="..\..\Defs\HediffDefs\Hediffs_GlobalMisc.xml">
+      <Link>Defs\Hediffs_GlobalMisc.xml</Link>
+    </Content>
     <Content Include="..\..\Defs\PawnRelationDefs\CCPawnRelations_FamilyByBlood.xml">
       <Link>Defs\CCPawnRelations_FamilyByBlood.xml</Link>
       <SubType>Designer</SubType>

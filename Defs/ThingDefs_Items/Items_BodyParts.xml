@@ -7,7 +7,7 @@
     <thingClass>RW_CrazyClones.CCBloodBag</thingClass>
     <defName>CCBloodBag</defName>
     <label>Blood Bag</label>
-    <description>Blood bag. Used to take dna samples for cloning.</description>
+    <description>Blood bag. Used to contain DNA samples for cloning.</description>
     <graphicData>
       <texPath>Items/BloodBag</texPath>
       <graphicClass>Graphic_Single</graphicClass>
