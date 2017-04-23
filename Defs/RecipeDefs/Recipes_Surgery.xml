@@ -30,14 +30,15 @@
         <minLevel>5</minLevel>
       </li>
     </skillRequirements>
+    <!--
     <products>
       <CCBloodBag>5</CCBloodBag>
     </products>
+ -->
     <appliedOnFixedBodyParts>
       <li>Heart</li>
     </appliedOnFixedBodyParts>
-   <!-- <addsHediff>CCBloodtaken</addsHediff>-->
-    <addsHediff>BloodLoss</addsHediff>
+    <addsHediff>CCBloodtaken</addsHediff>
   </RecipeDef>
 
 </RecipeDefs>

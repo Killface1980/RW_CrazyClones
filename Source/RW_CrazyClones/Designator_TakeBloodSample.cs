@@ -23,18 +23,18 @@ namespace RW_CrazyClones
 
         public Designator_TakeBloodSample()
         {
-            this.defaultLabel = "Take Blood";
-            this.icon = ContentFinder<Texture2D>.Get("Items/BloodBag", true);
-            this.defaultDesc = "Quickly designate Pawns to add the take blood medical bill.";
-            this.soundDragSustain = SoundDefOf.DesignateDragStandard;
-            this.soundDragChanged = SoundDefOf.DesignateDragStandardChanged;
-            this.useMouseIcon = true;
-            this.soundSucceeded = SoundDefOf.DesignateHaul;
+            defaultLabel = "Take Blood";
+            icon = ContentFinder<Texture2D>.Get("Items/BloodBag", true);
+            defaultDesc = "Quickly designate Pawns to add the take blood medical bill.";
+            soundDragSustain = SoundDefOf.DesignateDragStandard;
+            soundDragChanged = SoundDefOf.DesignateDragStandardChanged;
+            useMouseIcon = true;
+            soundSucceeded = SoundDefOf.DesignateHaul;
             DesignationCategoryDef named = DefDatabase<DesignationCategoryDef>.GetNamed("Orders", true);
-            Type type = named.specialDesignatorClasses.Find((Type x) => x == base.GetType());
+            Type type = named.specialDesignatorClasses.Find((Type x) => x == GetType());
             if (type == null)
             {
-                named.specialDesignatorClasses.Add(base.GetType());
+                named.specialDesignatorClasses.Add(GetType());
                 named.ResolveReferences();
                 DesignationCategoryDef named2 = DefDatabase<DesignationCategoryDef>.GetNamed("OrdersTakeBloodSampleAll", true);
                 List<DesignationCategoryDef> allDefsListForReading = DefDatabase<DesignationCategoryDef>.AllDefsListForReading;
@@ -46,16 +46,16 @@ namespace RW_CrazyClones
         public override AcceptanceReport CanDesignateCell(IntVec3 c)
         {
             AcceptanceReport result;
-            if (!GenGrid.InBounds(c, base.Map) || GridsUtility.Fogged(c, base.Map))
+            if (!GenGrid.InBounds(c, Map) || GridsUtility.Fogged(c, Map))
             {
                 result = false;
             }
             else
             {
                 bool flag = false;
-                foreach (Thing current in GridsUtility.GetThingList(c, base.Map))
+                foreach (Thing current in GridsUtility.GetThingList(c, Map))
                 {
-                    if (this.CanDesignateThing(current).Accepted)
+                    if (CanDesignateThing(current).Accepted)
                     {
                         flag = true;
                     }
@@ -93,42 +93,42 @@ namespace RW_CrazyClones
 
         public override void DesignateSingleCell(IntVec3 c)
         {
-            foreach (Thing current in GridsUtility.GetThingList(c, base.Map))
+            foreach (Thing current in GridsUtility.GetThingList(c, Map))
             {
-                if (this.CanDesignateThing(current).Accepted)
+                if (CanDesignateThing(current).Accepted)
                 {
-                    this.DesignateThing(current);
+                    DesignateThing(current);
                 }
             }
-            this.notifyResult();
+            notifyResult();
         }
 
         public override void DesignateMultiCell(IEnumerable<IntVec3> cells)
         {
             foreach (IntVec3 current in cells)
             {
-                foreach (Thing current2 in GridsUtility.GetThingList(current, base.Map))
+                foreach (Thing current2 in GridsUtility.GetThingList(current, Map))
                 {
-                    if (this.CanDesignateThing(current2).Accepted)
+                    if (CanDesignateThing(current2).Accepted)
                     {
-                        this.DesignateThing(current2);
+                        DesignateThing(current2);
                     }
                 }
             }
-            this.notifyResult();
+            notifyResult();
         }
 
         public void notifyResult()
         {
-            if (this.didWeDesignateAnything)
+            if (didWeDesignateAnything)
             {
                 SoundStarter.PlayOneShotOnCamera(SoundDefOf.DesignateDeconstruct);
             }
             else
             {
-                Messages.Message("Must designate colonists that aren't already designated.", Verse.MessageSound.RejectInput);
+                Messages.Message("Must designate colonists that aren't already designated.", MessageSound.RejectInput);
             }
-            this.didWeDesignateAnything = false;
+            didWeDesignateAnything = false;
         }
 
         public override void DesignateThing(Thing t)
@@ -150,13 +150,13 @@ namespace RW_CrazyClones
                                 Bill_Medical bill_Medical = new Bill_Medical(recipeDef);
                                 pawn.BillStack.AddBill(bill_Medical);
                                 bill_Medical.Part = part;
-                                this.didWeDesignateAnything = true;
+                                didWeDesignateAnything = true;
                             }
                         }
                     }
                 }
             }
-            this.didWeDesignateAnything = true;
+            didWeDesignateAnything = true;
         }
 
         public override void SelectedUpdate()
@@ -167,15 +167,15 @@ namespace RW_CrazyClones
         protected override void FinalizeDesignationSucceeded()
         {
             base.FinalizeDesignationSucceeded();
-            Messages.Message("Pawns designated for blood taking.", Verse.MessageSound.Standard);
-            this.didWeDesignateAnything = false;
+            Messages.Message("Pawns designated for blood taking.", MessageSound.Standard);
+            didWeDesignateAnything = false;
         }
 
         protected override void FinalizeDesignationFailed()
         {
             base.FinalizeDesignationFailed();
-            Messages.Message("Must designate pawns.", Verse.MessageSound.RejectInput);
-            this.didWeDesignateAnything = false;
+            Messages.Message("Must designate pawns.", MessageSound.RejectInput);
+            didWeDesignateAnything = false;
         }
     }
 

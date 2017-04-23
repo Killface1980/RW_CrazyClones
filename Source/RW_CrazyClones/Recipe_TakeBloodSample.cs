@@ -25,9 +25,16 @@ namespace RW_CrazyClones
                     billDoer,
                     pawn
                 });
+                pawn.health.AddHediff(recipe.addsHediff, part, null);
+                pawn.health.DropBloodFilth();
+                CCBloodBag dnaSample = ThingMaker.MakeThing(ThingDef.Named("CCBloodBag")) as CCBloodBag;
+                if (dnaSample != null)
+                {
+                    dnaSample.donorPawn = pawn;
+                    GenSpawn.Spawn(dnaSample, billDoer.Position, pawn.Map);
+                    Initializer.Test(dnaSample);
+                }
             }
-            pawn.health.AddHediff(this.recipe.addsHediff, part, null);
-            pawn.health.DropBloodFilth();
         }
     }
 

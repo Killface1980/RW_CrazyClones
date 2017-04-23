@@ -10,14 +10,14 @@ namespace RW_CrazyClones
 {
     class Initializer
     {
-        Pawn pawn;
 
-        public void Test()
+        public static void Test(CCBloodBag bag)
         {
-            PawnGenerationRequest request = new PawnGenerationRequest(pawn.kindDef, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, false, true, false, 20f, false, true, true, null, null, null, null, null, null);
-            Pawn generatePawn = PawnCloneGenerator.GenerateClonePawn(request, pawn);
 
-            GenSpawn.Spawn(generatePawn, pawn.Position.RandomAdjacentCell8Way(), pawn.Map);
+            PawnGenerationRequest request = new PawnGenerationRequest(bag.donorPawn.kindDef, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, false, true, false, 20f, false, true, true, null, null, null, null, null, null);
+            Pawn generatePawn = PawnCloneGenerator.GenerateClonePawn(request, bag.donorPawn);
+
+            GenSpawn.Spawn(generatePawn, bag.Position.RandomAdjacentCell8Way(), bag.Map);
             string text = "WandererJoin".Translate(new object[]
             {
                 generatePawn.kindDef.label,

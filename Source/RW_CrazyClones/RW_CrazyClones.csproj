@@ -42,6 +42,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
     <Compile Include="Recipe_TakeBloodSample.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="PawnCloneGenerator.cs" />
@@ -52,6 +53,12 @@
   <ItemGroup>
     <Content Include="..\..\Defs\RecipeDefs\Recipes_Surgery.xml">
       <Link>Defs\Recipes_Surgery.xml</Link>
+    </Content>
+    <Content Include="..\..\Defs\ThingDefs_Items\Items_Base.xml">
+      <Link>Defs\Items_Base.xml</Link>
+    </Content>
+    <Content Include="..\..\Defs\ThingDefs_Items\Items_BodyParts.xml">
+      <Link>Defs\Items_BodyParts.xml</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

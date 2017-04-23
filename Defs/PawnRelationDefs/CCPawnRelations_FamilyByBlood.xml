@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PawnRelationDefs>
+
+  <!-- close family -->
+
+  <PawnRelationDef>
+    <defName>CloneParent</defName>
+    <label>clone father</label>
+    <labelFemale>clone mother</labelFemale>
+    <importance>195</importance>
+    <diedThought>MyFatherDied</diedThought>
+    <diedThoughtFemale>MyMotherDied</diedThoughtFemale>
+    <killedThought>KilledMyFather</killedThought>
+    <killedThoughtFemale>KilledMyMother</killedThoughtFemale>
+    <soldThought>SoldMyLovedOne</soldThought>
+    <opinionOffset>30</opinionOffset>
+    <generationChanceFactor>0</generationChanceFactor>
+    <attractionFactor>0.03</attractionFactor>
+    <incestOpinionOffset>-30</incestOpinionOffset>
+    <implied>false</implied>
+    <familyByBloodRelation>true</familyByBloodRelation>
+  </PawnRelationDef>
+  
+  <PawnRelationDef>
+    <workerClass>PawnRelationWorker_Child</workerClass>
+    <defName>CloneChild</defName>
+    <label>clone son</label>
+    <labelFemale>clone daughter</labelFemale>
+    <importance>190</importance>
+    <diedThought>MySonDied</diedThought>
+    <diedThoughtFemale>MyDaughterDied</diedThoughtFemale>
+    <killedThought>KilledMySon</killedThought>
+    <killedThoughtFemale>KilledMyDaughter</killedThoughtFemale>
+    <soldThought>SoldMyLovedOne</soldThought>
+    <opinionOffset>30</opinionOffset>
+    <generationChanceFactor>0</generationChanceFactor>
+    <attractionFactor>0.03</attractionFactor>
+    <incestOpinionOffset>-30</incestOpinionOffset>
+    <implied>true</implied>
+    <familyByBloodRelation>true</familyByBloodRelation>
+  </PawnRelationDef>
+  
+  <PawnRelationDef>
+    <workerClass>PawnRelationWorker_Sibling</workerClass>
+    <defName>CloneSibling</defName>
+    <label>clone brother</label>
+    <labelFemale>clone sister</labelFemale>
+    <importance>185</importance>
+    <diedThought>MyBrotherDied</diedThought>
+    <diedThoughtFemale>MySisterDied</diedThoughtFemale>
+    <killedThought>KilledMyBrother</killedThought>
+    <killedThoughtFemale>KilledMySister</killedThoughtFemale>
+    <soldThought>SoldMyLovedOne</soldThought>
+    <opinionOffset>20</opinionOffset>
+    <generationChanceFactor>0</generationChanceFactor>
+    <attractionFactor>0.03</attractionFactor>
+    <incestOpinionOffset>-15</incestOpinionOffset>
+    <implied>true</implied>
+    <familyByBloodRelation>true</familyByBloodRelation>
+  </PawnRelationDef>
+
+    
+  <!-- kin -->
+  
+  <PawnRelationDef>
+    <workerClass>PawnRelationWorker_Kin</workerClass>
+    <defName>Kin</defName>
+    <label>kin</label>
+    <importance>90</importance>
+    <diedThought>MyKinDied</diedThought>
+    <killedThought>KilledMyKin</killedThought>
+    <opinionOffset>5</opinionOffset>
+    <attractionFactor>0.5</attractionFactor>
+    <implied>true</implied>
+    <familyByBloodRelation>true</familyByBloodRelation>
+  </PawnRelationDef>
+  
+</PawnRelationDefs>

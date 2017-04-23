@@ -4,6 +4,7 @@
   <!--================================= blood bag =================================-->
   
   <ThingDef ParentName="CCResourceBase">
+    <thingClass>RW_CrazyClones.CCBloodBag</thingClass>
     <defName>CCBloodBag</defName>
     <label>Blood Bag</label>
     <description>Blood bag. Used to take dna samples for cloning.</description>

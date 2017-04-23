@@ -28,14 +28,14 @@ namespace RW_CrazyClones
 
             public PawnGenerationStatus(Pawn pawn, List<Pawn> pawnsGeneratedInTheMeantime)
             {
-                this.Pawn = pawn;
-                this.PawnsGeneratedInTheMeantime = pawnsGeneratedInTheMeantime;
+                Pawn = pawn;
+                PawnsGeneratedInTheMeantime = pawnsGeneratedInTheMeantime;
             }
         }
 
         public const int MaxStartMentalStateThreshold = 40;
 
-        private static List<PawnCloneGenerator.PawnGenerationStatus> pawnsBeingGenerated = new List<PawnCloneGenerator.PawnGenerationStatus>();
+        private static List<PawnGenerationStatus> pawnsBeingGenerated = new List<PawnGenerationStatus>();
 
         private static SimpleCurve DefaultAgeGenerationCurve = new SimpleCurve
         {
@@ -82,7 +82,7 @@ namespace RW_CrazyClones
 
             if (pawn == null)
             {
-                pawn = PawnCloneGenerator.GenerateNewNakedClonePawn(donorPawn, ref request);
+                pawn = GenerateNewNakedClonePawn(donorPawn, ref request);
                 if (pawn == null)
                 {
                     return null;
@@ -107,7 +107,7 @@ namespace RW_CrazyClones
                 {
                     Log.Error(string.Concat(new object[]
                     {
-                        "Could not generate a pawn after ",
+                        "Could not generate a clonePawn after ",
                         70,
                         " tries. Last error: ",
                         text,
@@ -116,7 +116,7 @@ namespace RW_CrazyClones
                     ignoreScenarioRequirements = true;
                 }
                 PawnGenerationRequest pawnGenerationRequest = request;
-                pawn = PawnCloneGenerator.DoGenerateNewNakedClonePawn(donorPawn, ref pawnGenerationRequest, out text, ignoreScenarioRequirements);
+                pawn = DoGenerateNewNakedClonePawn(donorPawn, ref pawnGenerationRequest, out text, ignoreScenarioRequirements);
                 if (pawn != null)
                 {
                     request = pawnGenerationRequest;
@@ -143,7 +143,7 @@ namespace RW_CrazyClones
         {
             error = null;
             Pawn pawn = (Pawn)ThingMaker.MakeThing(request.KindDef.race, null);
-            PawnCloneGenerator.pawnsBeingGenerated.Add(new PawnCloneGenerator.PawnGenerationStatus(pawn, null));
+            pawnsBeingGenerated.Add(new PawnGenerationStatus(pawn, null));
             Pawn result;
             try
             {
@@ -155,30 +155,30 @@ namespace RW_CrazyClones
                 pawn.gender = donorPawn.gender;
                 //if (request.FixedGender.HasValue)
                 //{
-                //    pawn.gender = request.FixedGender.Value;
+                //    clonePawn.gender = request.FixedGender.Value;
                 //}
-                //else if (pawn.RaceProps.hasGenders)
+                //else if (clonePawn.RaceProps.hasGenders)
                 //{
                 //    if (Rand.Value < 0.5f)
                 //    {
-                //        pawn.gender = Gender.Male;
+                //        clonePawn.gender = Gender.Male;
                 //    }
                 //    else
                 //    {
-                //        pawn.gender = Gender.Female;
+                //        clonePawn.gender = Gender.Female;
                 //    }
                 //}
                 //else
                 //{
-                //    pawn.gender = Gender.None;
+                //    clonePawn.gender = Gender.None;
                 //}
 
                 // Age
-                PawnCloneGenerator.GenerateRandomCloneAge(pawn, request, donorPawn);
+                GenerateRandomCloneAge(pawn, request, donorPawn);
                 pawn.needs.SetInitialLevels();
                 if (!request.Newborn && request.CanGeneratePawnRelations)
                 {
-                    PawnCloneGenerator.GenerateClonePawnRelations(donorPawn, pawn, ref request);
+                    GenerateClonePawnRelations(donorPawn, pawn, ref request);
                 }
                 if (pawn.RaceProps.Humanlike)
                 {
@@ -189,13 +189,13 @@ namespace RW_CrazyClones
                     GiveAppropriateBioAndNameTo(donorPawn, pawn, request.FixedLastName);
                     pawn.story.childhood = donorPawn.story.childhood;
                     pawn.story.childhood = donorPawn.story.adulthood;
-                    pawn.story.hairDef = donorPawn.story.hairDef;// PawnHairChooser.RandomHairDefFor(pawn, request.Faction.def);
-                    PawnCloneGenerator.GenerateTraits(donorPawn, pawn, request.AllowGay);
-                    PawnCloneGenerator.GenerateBodyType(donorPawn, pawn);
-                    PawnCloneGenerator.GenerateSkills(donorPawn, pawn);
+                    pawn.story.hairDef = donorPawn.story.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
+                    GenerateTraits(donorPawn, pawn, request.AllowGay);
+                    GenerateBodyType(donorPawn, pawn);
+                    GenerateSkills(donorPawn, pawn);
                 }
                 //To Do: Rewrite
-                PawnCloneGenerator.GenerateInitialHediffs(pawn, request);
+                GenerateInitialHediffs(pawn, request);
                 if (pawn.workSettings != null && request.Faction.IsPlayer)
                 {
                     pawn.workSettings.EnableAndInitialize();
@@ -206,50 +206,50 @@ namespace RW_CrazyClones
                 }
                 if (!request.AllowDead && (pawn.Dead || pawn.Destroyed))
                 {
-                    PawnCloneGenerator.DiscardGeneratedPawn(pawn);
-                    error = "Generated dead pawn.";
+                    DiscardGeneratedPawn(pawn);
+                    error = "Generated dead clonePawn.";
                     result = null;
                 }
                 else if (!request.AllowDowned && pawn.Downed)
                 {
-                    PawnCloneGenerator.DiscardGeneratedPawn(pawn);
-                    error = "Generated downed pawn.";
+                    DiscardGeneratedPawn(pawn);
+                    error = "Generated downed clonePawn.";
                     result = null;
                 }
                 else if (request.MustBeCapableOfViolence && pawn.story != null && pawn.story.WorkTagIsDisabled(WorkTags.Violent))
                 {
-                    PawnCloneGenerator.DiscardGeneratedPawn(pawn);
-                    error = "Generated pawn incapable of violence.";
+                    DiscardGeneratedPawn(pawn);
+                    error = "Generated clonePawn incapable of violence.";
                     result = null;
                 }
                 else if (!ignoreScenarioRequirements && request.Context == PawnGenerationContext.PlayerStarter && !Find.Scenario.AllowPlayerStartingPawn(pawn))
                 {
-                    PawnCloneGenerator.DiscardGeneratedPawn(pawn);
-                    error = "Generated pawn doesn't meet scenario requirements.";
+                    DiscardGeneratedPawn(pawn);
+                    error = "Generated clonePawn doesn't meet scenario requirements.";
                     result = null;
                 }
                 else if (request.Validator != null && !request.Validator(pawn))
                 {
-                    PawnCloneGenerator.DiscardGeneratedPawn(pawn);
-                    error = "Generated pawn didn't pass validator check.";
+                    DiscardGeneratedPawn(pawn);
+                    error = "Generated clonePawn didn't pass validator check.";
                     result = null;
                 }
                 else
                 {
-                    for (int i = 0; i < PawnCloneGenerator.pawnsBeingGenerated.Count - 1; i++)
+                    for (int i = 0; i < pawnsBeingGenerated.Count - 1; i++)
                     {
-                        if (PawnCloneGenerator.pawnsBeingGenerated[i].PawnsGeneratedInTheMeantime == null)
+                        if (pawnsBeingGenerated[i].PawnsGeneratedInTheMeantime == null)
                         {
-                            PawnCloneGenerator.pawnsBeingGenerated[i] = new PawnCloneGenerator.PawnGenerationStatus(PawnCloneGenerator.pawnsBeingGenerated[i].Pawn, new List<Pawn>());
+                            pawnsBeingGenerated[i] = new PawnGenerationStatus(pawnsBeingGenerated[i].Pawn, new List<Pawn>());
                         }
-                        PawnCloneGenerator.pawnsBeingGenerated[i].PawnsGeneratedInTheMeantime.Add(pawn);
+                        pawnsBeingGenerated[i].PawnsGeneratedInTheMeantime.Add(pawn);
                     }
                     result = pawn;
                 }
             }
             finally
             {
-                PawnCloneGenerator.pawnsBeingGenerated.RemoveLast<PawnCloneGenerator.PawnGenerationStatus>();
+                pawnsBeingGenerated.RemoveLast<PawnGenerationStatus>();
             }
             return result;
         }
@@ -261,7 +261,7 @@ namespace RW_CrazyClones
                 Find.WorldPawns.RemovePawn(pawn);
             }
             Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
-            List<Pawn> pawnsGeneratedInTheMeantime = PawnCloneGenerator.pawnsBeingGenerated.Last<PawnCloneGenerator.PawnGenerationStatus>().PawnsGeneratedInTheMeantime;
+            List<Pawn> pawnsGeneratedInTheMeantime = pawnsBeingGenerated.Last<PawnGenerationStatus>().PawnsGeneratedInTheMeantime;
             if (pawnsGeneratedInTheMeantime != null)
             {
                 for (int i = 0; i < pawnsGeneratedInTheMeantime.Count; i++)
@@ -272,9 +272,9 @@ namespace RW_CrazyClones
                         Find.WorldPawns.RemovePawn(pawn2);
                     }
                     Find.WorldPawns.PassToWorld(pawn2, PawnDiscardDecideMode.Discard);
-                    for (int j = 0; j < PawnCloneGenerator.pawnsBeingGenerated.Count; j++)
+                    for (int j = 0; j < pawnsBeingGenerated.Count; j++)
                     {
-                        PawnCloneGenerator.pawnsBeingGenerated[j].PawnsGeneratedInTheMeantime.Remove(pawn2);
+                        pawnsBeingGenerated[j].PawnsGeneratedInTheMeantime.Remove(pawn2);
                     }
                 }
             }
@@ -342,7 +342,7 @@ namespace RW_CrazyClones
                 pawn.ThingID,
                 " of age ",
                 pawn.ageTracker.AgeBiologicalYears,
-                " that allow pawn to move after ",
+                " that allow clonePawn to move after ",
                 80,
                 " tries. request=",
                 request
@@ -375,9 +375,9 @@ namespace RW_CrazyClones
                 {
                     Log.Warning(string.Concat(new object[]
                     {
-                        "Tried to generate age for pawn ",
+                        "Tried to generate age for clonePawn ",
                         pawn,
-                        ", but pawn generation request demands biological age (",
+                        ", but clonePawn generation request demands biological age (",
                         request.FixedBiologicalAge,
                         ") to be greater than chronological age (",
                         request.FixedChronologicalAge,
@@ -409,7 +409,7 @@ namespace RW_CrazyClones
                     }
                     else
                     {
-                        num2 = Rand.ByCurve(PawnCloneGenerator.DefaultAgeGenerationCurve, 200) * pawn.RaceProps.lifeExpectancy;
+                        num2 = Rand.ByCurve(DefaultAgeGenerationCurve, 200) * pawn.RaceProps.lifeExpectancy;
                     }
                     num++;
                     if (num > 300)
@@ -521,7 +521,7 @@ namespace RW_CrazyClones
             int num = Rand.RangeInclusive(2, 3);
             if (allowGay && (LovePartnerRelationUtility.HasAnyLovePartnerOfTheSameGender(pawn) || LovePartnerRelationUtility.HasAnyExLovePartnerOfTheSameGender(pawn)))
             {
-                Trait trait = new Trait(TraitDefOf.Gay, PawnCloneGenerator.RandomTraitDegree(TraitDefOf.Gay), false);
+                Trait trait = new Trait(TraitDefOf.Gay, RandomTraitDegree(TraitDefOf.Gay), false);
                 pawn.story.traits.GainTrait(trait);
             }
             while (pawn.story.traits.allTraits.Count < num)
@@ -546,7 +546,7 @@ namespace RW_CrazyClones
                         {
                             if (!pawn.story.WorkTagIsDisabled(newTraitDef.requiredWorkTags))
                             {
-                                int degree = PawnCloneGenerator.RandomTraitDegree(newTraitDef);
+                                int degree = RandomTraitDegree(newTraitDef);
                                 if (!pawn.story.childhood.DisallowsTrait(newTraitDef, degree) && (pawn.story.adulthood == null || !pawn.story.adulthood.DisallowsTrait(newTraitDef, degree)))
                                 {
                                     Trait trait2 = new Trait(newTraitDef, degree, false);
@@ -589,7 +589,7 @@ namespace RW_CrazyClones
             for (int i = 0; i < allDefsListForReading.Count; i++)
             {
                 SkillDef skillDef = allDefsListForReading[i];
-                int num = PawnCloneGenerator.FinalLevelOfSkill(pawn, skillDef);
+                int num = FinalLevelOfSkill(pawn, skillDef);
                 SkillRecord skill = pawn.skills.GetSkill(skillDef);
                 skill.Level = num;
                 if (!skill.TotallyDisabled)
@@ -621,7 +621,7 @@ namespace RW_CrazyClones
             }
             else
             {
-                num = Rand.ByCurve(PawnCloneGenerator.LevelRandomCurve, 100);
+                num = Rand.ByCurve(LevelRandomCurve, 100);
             }
             foreach (Backstory current in from bs in pawn.story.AllBackstories
                                           where bs != null
@@ -643,9 +643,9 @@ namespace RW_CrazyClones
                     num += (float)num2;
                 }
             }
-            float num3 = Rand.Range(1f, PawnCloneGenerator.AgeSkillMaxFactorCurve.Evaluate((float)pawn.ageTracker.AgeBiologicalYears));
+            float num3 = Rand.Range(1f, AgeSkillMaxFactorCurve.Evaluate((float)pawn.ageTracker.AgeBiologicalYears));
             num *= num3;
-            num = PawnCloneGenerator.LevelFinalAdjustmentCurve.Evaluate(num);
+            num = LevelFinalAdjustmentCurve.Evaluate(num);
             return Mathf.Clamp(Mathf.RoundToInt(num), 0, 20);
         }
 
@@ -668,66 +668,68 @@ namespace RW_CrazyClones
             }
         }
 
-        private static void GenerateClonePawnRelations(Pawn donorPawn, Pawn pawn, ref PawnGenerationRequest request)
+        private static void GenerateClonePawnRelations(Pawn donorPawn, Pawn clonePawn, ref PawnGenerationRequest request)
         {
-            if (!pawn.RaceProps.Humanlike)
+            if (!clonePawn.RaceProps.Humanlike)
             {
                 return;
             }
             List<KeyValuePair<Pawn, PawnRelationDef>> list = new List<KeyValuePair<Pawn, PawnRelationDef>>();
             List<PawnRelationDef> allDefsListForReading = DefDatabase<PawnRelationDef>.AllDefsListForReading;
             IEnumerable<Pawn> enumerable = from x in PawnsFinder.AllMapsAndWorld_AliveOrDead
-                                           where x.def == pawn.def
+                                           where x.def == donorPawn.def
                                            select x;
-            foreach (Pawn current in enumerable)
-            {
-                if (current.Discarded)
-                {
-                    Log.Warning(string.Concat(new object[]
-                    {
-                        "Warning during generating pawn relations for ",
-                        pawn,
-                        ": Pawn ",
-                        current,
-                        " is discarded, yet he was yielded by PawnUtility. Discarding a pawn means that he is no longer managed by anything."
-                    }));
-                }
-                else
-                {
-                    for (int i = 0; i < allDefsListForReading.Count; i++)
-                    {
-                        if (allDefsListForReading[i].generationChanceFactor > 0f)
-                        {
-                            list.Add(new KeyValuePair<Pawn, PawnRelationDef>(current, allDefsListForReading[i]));
-                        }
-                    }
-                }
-            }
-            PawnGenerationRequest localReq = request;
-            KeyValuePair<Pawn, PawnRelationDef> keyValuePair = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<Pawn, PawnRelationDef> x)
-            {
-                if (!x.Value.familyByBloodRelation)
-                {
-                    return 0f;
-                }
-                return x.Value.generationChanceFactor * x.Value.Worker.GenerationChance(pawn, x.Key, localReq);
-            }, 82f);
-            if (keyValuePair.Key != null)
-            {
-                keyValuePair.Value.Worker.CreateRelation(pawn, keyValuePair.Key, ref request);
-            }
-            KeyValuePair<Pawn, PawnRelationDef> keyValuePair2 = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<Pawn, PawnRelationDef> x)
-            {
-                if (x.Value.familyByBloodRelation)
-                {
-                    return 0f;
-                }
-                return x.Value.generationChanceFactor * x.Value.Worker.GenerationChance(pawn, x.Key, localReq);
-            }, 82f);
-            if (keyValuePair2.Key != null)
-            {
-                keyValuePair2.Value.Worker.CreateRelation(pawn, keyValuePair2.Key, ref request);
-            }
+            clonePawn.relations.AddDirectRelation(DefDatabase<PawnRelationDef>.GetNamed("CloneParent"), donorPawn);
+            donorPawn.relations.AddDirectRelation(DefDatabase<PawnRelationDef>.GetNamed("CloneChild"), clonePawn);
+            //foreach (Pawn current in enumerable)
+            //{
+            //    if (current.Discarded)
+            //    {
+            //        Log.Warning(string.Concat(new object[]
+            //        {
+            //            "Warning during generating clonePawn relations for ",
+            //            clonePawn,
+            //            ": Pawn ",
+            //            current,
+            //            " is discarded, yet he was yielded by PawnUtility. Discarding a clonePawn means that he is no longer managed by anything."
+            //        }));
+            //    }
+            //    else
+            //    {
+            //        for (int i = 0; i < allDefsListForReading.Count; i++)
+            //        {
+            //            if (allDefsListForReading[i].generationChanceFactor > 0f)
+            //            {
+            //                list.Add(new KeyValuePair<Pawn, PawnRelationDef>(current, allDefsListForReading[i]));
+            //            }
+            //        }
+            //    }
+            //}
+            //PawnGenerationRequest localReq = request;
+            //KeyValuePair<Pawn, PawnRelationDef> keyValuePair = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<Pawn, PawnRelationDef> x)
+            //{
+            //    if (!x.Value.familyByBloodRelation)
+            //    {
+            //        return 0f;
+            //    }
+            //    return x.Value.generationChanceFactor * x.Value.Worker.GenerationChance(clonePawn, x.Key, localReq);
+            //}, 82f);
+            //if (keyValuePair.Key != null)
+            //{
+            //    keyValuePair.Value.Worker.CreateRelation(clonePawn, keyValuePair.Key, ref request);
+            //}
+            //KeyValuePair<Pawn, PawnRelationDef> keyValuePair2 = list.RandomElementByWeightWithDefault(delegate (KeyValuePair<Pawn, PawnRelationDef> x)
+            //{
+            //    if (x.Value.familyByBloodRelation)
+            //    {
+            //        return 0f;
+            //    }
+            //    return x.Value.generationChanceFactor * x.Value.Worker.GenerationChance(clonePawn, x.Key, localReq);
+            //}, 82f);
+            //if (keyValuePair2.Key != null)
+            //{
+            //    keyValuePair2.Value.Worker.CreateRelation(clonePawn, keyValuePair2.Key, ref request);
+            //}
         }
         // Imported
 
@@ -824,22 +826,25 @@ namespace RW_CrazyClones
 
         public static void GiveAppropriateBioAndNameTo(Pawn donorPawn, Pawn pawn, string requiredLastName)
         {
-            if ((Rand.Value < 0.25f || pawn.kindDef.factionLeader) && TryGiveSolidBioTo(pawn, requiredLastName))
-            {
-                return;
-            }
+          //if ((Rand.Value < 0.25f || pawn.kindDef.factionLeader) && TryGiveSolidBioTo(pawn, requiredLastName))
+          //{
+          //    return;
+          //}
             GiveShuffledBioTo(donorPawn, pawn, pawn.Faction.def, requiredLastName);
         }
 
         // RimWorld.PawnBioAndNameGenerator
-        private static void GiveShuffledBioTo(Pawn donorPawn, Pawn pawn, FactionDef factionType, string requiredLastName)
+        private static void GiveShuffledBioTo(Pawn donorPawn, Pawn clonePawn, FactionDef factionType, string requiredLastName)
         {
-            // To do: proper clone names
-            pawn.Name = donorPawn.Name;// PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, requiredLastName);
-            SetBackstoryInSlot(pawn, BackstorySlot.Childhood, ref pawn.story.childhood, factionType);
-            if (pawn.ageTracker.AgeBiologicalYearsFloat >= 20f)
+            // To do: proper clonePawn names
+            clonePawn.Name = donorPawn.Name;// PawnBioAndNameGenerator.GeneratePawnName(clonePawn, NameStyle.Full, requiredLastName);
+            clonePawn.story.childhood = donorPawn.story.childhood;
+            clonePawn.story.adulthood = donorPawn.story.adulthood;
+            return;
+            SetBackstoryInSlot(clonePawn, BackstorySlot.Childhood, ref clonePawn.story.childhood, factionType);
+            if (clonePawn.ageTracker.AgeBiologicalYearsFloat >= 20f)
             {
-                SetBackstoryInSlot(pawn, BackstorySlot.Adulthood, ref pawn.story.adulthood, factionType);
+                SetBackstoryInSlot(clonePawn, BackstorySlot.Adulthood, ref clonePawn.story.adulthood, factionType);
             }
         }
         // RimWorld.PawnBioAndNameGenerator
