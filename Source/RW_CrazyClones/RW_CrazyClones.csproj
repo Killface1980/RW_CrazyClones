@@ -47,6 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CCBloodBag.cs" />
+    <None Include="BackstoryDef.cs" />
+    <Compile Include="Job_ClonePawnAtCloneLab.cs" />
+    <Compile Include="Class2.cs" />
+    <Compile Include="Dialog_Cloning.cs" />
     <Compile Include="DNA_Blueprint.cs" />
     <Compile Include="PawnRelationWorker_CloneSibling.cs" />
     <Compile Include="PawnRelationWorker_CloneChild.cs" />

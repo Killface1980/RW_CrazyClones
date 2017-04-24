@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<JobDefs>
+
+  <JobDef>
+    <defName>ClonePawnAtCloneLab</defName>
+    <driverClass>RW_CrazyClones.Job_ClonePawnAtCloneLab</driverClass>
+    <reportString>Cloning something at the clone lab.</reportString>
+  </JobDef>
+
+</JobDefs>

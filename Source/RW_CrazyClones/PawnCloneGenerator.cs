@@ -190,8 +190,14 @@ namespace RW_CrazyClones
                     //to do: Bio
                     //GiveAppropriateBioAndNameTo(pawnDna, clonePawn, request.FixedLastName);
                     clonePawn.Name = dnaBlueprint.Name;
+
+                    // backstories not working!
+                    // clonePawn.story.childhood = BackstoryDatabase.allBackstories["CC_VatGrownClone"];
                     clonePawn.story.childhood = dnaBlueprint.childhood;
+
                     clonePawn.story.adulthood = dnaBlueprint.adulthood;
+
+
                     clonePawn.story.hairDef = dnaBlueprint.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
                     clonePawn.story.traits = dnaBlueprint.traits;
 

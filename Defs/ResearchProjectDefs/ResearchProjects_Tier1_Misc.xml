@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<!--=============================== Tier 1: pre-electricity ===================================-->
+
+	<ResearchProjectDef>
+		<defName>CloneProduction</defName>
+		<label>clone production</label>
+		<description>The basics of drug preparation and synthesis. Allows creation of the drug lab. Further research is required to make specific drugs.</description>
+		<baseCost>10</baseCost>
+		<techLevel>Industrial</techLevel>
+		<researchViewX>1</researchViewX>
+		<researchViewY>0</researchViewY>
+	</ResearchProjectDef>
+
+</Defs>

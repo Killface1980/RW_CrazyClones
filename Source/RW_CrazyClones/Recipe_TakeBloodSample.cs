@@ -67,13 +67,7 @@ namespace RW_CrazyClones
                     }
 
                     GenSpawn.Spawn(dnaBlueprint, billDoer.Position, billDoer.Map);
-                    Initializer.Test(dnaBlueprint);
-                    Initializer.Test(dnaBlueprint);
-                    Initializer.Test(dnaBlueprint);
-                    Initializer.Test(dnaBlueprint);
-                    Initializer.Test(dnaBlueprint);
-                    Initializer.Test(dnaBlueprint);
-                    Initializer.Test(dnaBlueprint);
+
                 }
             }
         }
