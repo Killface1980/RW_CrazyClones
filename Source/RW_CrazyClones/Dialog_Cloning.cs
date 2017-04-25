@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using RimWorld;
+using RW_CrazyClones.Utilities;
+#if FS
 using RW_FacialStuff;
 using RW_FacialStuff.Defs;
 using RW_FacialStuff.Detouring;
-using RW_FacialStuff.Utilities;
+#endif
 using UnityEngine;
 using Verse;
 
@@ -28,15 +30,7 @@ namespace RW_CrazyClones
         private static int _columns;
 
 
-        private static HairDef _newHair;
-        private static HairDef originalHair;
-        private static BeardDef _newBeard;
-        private static MouthDef _newMouth;
-        private static MouthDef originalMouth;
-        private static EyeDef _newEye;
-        private static EyeDef originalEye;
-        private static BrowDef _newBrow;
-        private static Color _newColour;
+
 
 
 
@@ -75,21 +69,19 @@ namespace RW_CrazyClones
 
         public override void DoWindowContents(Rect inRect)
         {
-            Rect rect = new Rect(_iconSize + _margin, 0f, inRect.width - _iconSize - _margin, _titleHeight);
-            Text.Font = GameFont.Medium;
-            Text.Anchor = TextAnchor.MiddleLeft;
+            Rect rect = new Rect(_iconSize + _margin, 0f, inRect.width - _iconSize - _margin, inRect.height);
+
             GUILayout.BeginArea(rect);
+            GUILayout.BeginVertical();
             GUILayout.Label(_title);
-            Text.Anchor = TextAnchor.UpperLeft;
-            Text.Font = GameFont.Small;
+            GUILayout.EndVertical();
 
             //      Rect iconPosition = new Rect(0f, 0f, _iconSize, _iconSize).CenteredOnYIn(rect);
             //     GUI.DrawTexture(iconPosition, _icon);
 
-            var cloneList = new Dictionary<CCBloodBag, int>(); ;
             foreach (var thing in Find.VisibleMap.listerThings.ThingsOfDef(ThingDef.Named("CCBloodBag")))
             {
-                CCBloodBag bloodbag = (CCBloodBag)thing;
+                DNA_Blueprint bloodbag = (DNA_Blueprint)thing;
                 DrawCloneRow(bloodbag);
             }
 
@@ -100,8 +92,15 @@ namespace RW_CrazyClones
 
                 foreach (var thing in Find.VisibleMap.listerThings.ThingsOfDef(ThingDef.Named("CCBloodBag")))
                 {
-                    CCBloodBag bloodbag = (CCBloodBag)thing;
-                    Initializer.Test(bloodbag);
+                    DNA_Blueprint bloodbag = (DNA_Blueprint)thing;
+                    if (bloodbag.amountToClone > 0)
+                    {
+                        for (int i = 0; i < bloodbag.amountToClone; i++)
+                        {
+                            Initializer.Test(bloodbag);
+
+                        }
+                    }
                 }
                 // force colonist bar to update
                 // xxx
@@ -114,13 +113,16 @@ namespace RW_CrazyClones
 
 
 
-        private void DrawCloneRow(CCBloodBag bloodbag)
+        private void DrawCloneRow(DNA_Blueprint bloodbag)
         {
-            GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            GUILayout.Label(bloodbag.Name.ToStringFull);
-            GUILayout.EndHorizontal();
+            GUILayout.BeginVertical();
+            GUILayout.Label(bloodbag.nameInt.ToStringFull);
             GUILayout.EndVertical();
+            GUILayout.BeginVertical();
+            bloodbag.amountToClone = (int)GUILayout.HorizontalSlider(bloodbag.amountToClone, 0, 10);
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
         }
     }
 }

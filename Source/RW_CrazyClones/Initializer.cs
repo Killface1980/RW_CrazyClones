@@ -14,7 +14,7 @@ namespace RW_CrazyClones
         public static void Test(DNA_Blueprint dnaBlueprint)
         {
 
-            PawnGenerationRequest request = new PawnGenerationRequest(dnaBlueprint.pawnKind, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, false, true, false, 20f, false, true, true, null, null, null, null, null, null);
+            PawnGenerationRequest request = new PawnGenerationRequest(dnaBlueprint.kindDef, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, false, true, false, 20f, false, true, true, null, null, null, null, null, null);
             Pawn clonePawn = PawnCloneGenerator.GenerateClonePawn(request, dnaBlueprint);
 
             GenSpawn.Spawn(clonePawn, dnaBlueprint.Position.RandomAdjacentCell8Way(), dnaBlueprint.Map);

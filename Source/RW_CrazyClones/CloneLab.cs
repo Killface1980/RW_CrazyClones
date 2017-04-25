@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FaceStyling;
 using Verse;
 using Verse.AI;
 

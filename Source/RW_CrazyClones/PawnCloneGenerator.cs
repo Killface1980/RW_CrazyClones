@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using RW_FacialStuff;
 using UnityEngine;
 using Verse;
 
@@ -143,7 +142,7 @@ namespace RW_CrazyClones
         private static Pawn DoGenerateNewNakedClonePawn(DNA_Blueprint dnaBlueprint, ref PawnGenerationRequest request, out string error, bool ignoreScenarioRequirements)
         {
             error = null;
-            Pawn clonePawn = (Pawn)ThingMaker.MakeThing(dnaBlueprint.pawnKind.race, null);
+            Pawn clonePawn = (Pawn)ThingMaker.MakeThing(dnaBlueprint.kindDef.race, null);
             pawnsBeingGenerated.Add(new PawnGenerationStatus(clonePawn, null));
             Pawn result;
             try
@@ -153,7 +152,7 @@ namespace RW_CrazyClones
                 PawnComponentsUtility.CreateInitialComponents(clonePawn);
 
                 // Gender
-                clonePawn.gender = dnaBlueprint.donorPawn.gender;
+                clonePawn.gender = dnaBlueprint.gender;
                 //if (request.FixedGender.HasValue)
                 //{
                 //    clonePawn.gender = request.FixedGender.Value;
@@ -186,10 +185,10 @@ namespace RW_CrazyClones
                     clonePawn.story.melanin = dnaBlueprint.melanin;// ((!request.FixedMelanin.HasValue) ? PawnSkinColors.RandomMelanin() : request.FixedMelanin.Value);
                     clonePawn.story.crownType = dnaBlueprint.crownType;//((Rand.Value >= 0.5f) ? CrownType.Narrow : CrownType.Average);
                     clonePawn.story.hairColor = dnaBlueprint.hairColor;
-                  //  PawnHairColors.RandomHairColor(clonePawn.story.SkinColor, clonePawn.ageTracker.AgeBiologicalYears);
+                    //  PawnHairColors.RandomHairColor(clonePawn.story.SkinColor, clonePawn.ageTracker.AgeBiologicalYears);
                     //to do: Bio
                     //GiveAppropriateBioAndNameTo(pawnDna, clonePawn, request.FixedLastName);
-                    clonePawn.Name = dnaBlueprint.Name;
+                    clonePawn.Name = dnaBlueprint.nameInt;
 
                     // backstories not working!
                     // clonePawn.story.childhood = BackstoryDatabase.allBackstories["CC_VatGrownClone"];
@@ -201,6 +200,7 @@ namespace RW_CrazyClones
                     clonePawn.story.hairDef = dnaBlueprint.hairDef;// PawnHairChooser.RandomHairDefFor(clonePawn, request.Faction.def);
                     clonePawn.story.traits = dnaBlueprint.traits;
 
+#if FS
                     //FS
                     CompFace faceComp = clonePawn.TryGetComp<CompFace>();
 
@@ -216,14 +216,14 @@ namespace RW_CrazyClones
                     faceComp.drawMouth = dnaBlueprint.drawMouth;                    
                     faceComp.optimized = dnaBlueprint.optimized;
                     // FS end
-
+#endif
                     PassTraitsFromDonor(dnaBlueprint, clonePawn);
                     GenerateBodyType(dnaBlueprint, clonePawn);
-                    clonePawn.skills = dnaBlueprint.skills;
-                //    GenerateSkills(dnaBlueprint, clonePawn);
+               //     clonePawn.skills.skills = dnaBlueprint.skills;
+                    GenerateSkills(dnaBlueprint, clonePawn);
                 }
                 //To Do: Rewrite
-            
+
                 // GenerateInitialHediffs(clonePawn, request);
                 if (clonePawn.workSettings != null && request.Faction.IsPlayer)
                 {
@@ -369,18 +369,11 @@ namespace RW_CrazyClones
 
         }
 
-        public static int RandomTraitDegree(TraitDef traitDef)
-        {
-            if (traitDef.degreeDatas.Count == 1)
-            {
-                return traitDef.degreeDatas[0].degree;
-            }
-            return traitDef.degreeDatas.RandomElementByWeight((TraitDegreeData dd) => dd.Commonality).degree;
-        }
+
 
         private static void PassTraitsFromDonor(DNA_Blueprint donorPawn, Pawn pawn)
         {
-            if (donorPawn == null || pawn.story== null)
+            if (donorPawn == null || pawn.story == null)
             {
                 return;
             }
@@ -404,16 +397,25 @@ namespace RW_CrazyClones
             }
         }
 
-        private static void GenerateSkills(Pawn donorPawn, Pawn pawn)
+        private static void GenerateSkills(DNA_Blueprint donorPawn, Pawn clonePawn)
         {
-            pawn.skills = donorPawn.skills;
+            foreach (var Cloneskill in donorPawn.skills)
+            {
+                SkillRecord skill = clonePawn.skills.GetSkill(Cloneskill.def);
+                skill.Level = Cloneskill.Level;
+                if (!skill.TotallyDisabled)
+                    skill.passion = Cloneskill.passion;
+                skill.xpSinceLastLevel = Cloneskill.xpSinceLastLevel;
+
+            }
+            return;
 
             List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
             for (int i = 0; i < allDefsListForReading.Count; i++)
             {
                 SkillDef skillDef = allDefsListForReading[i];
-                int num = FinalLevelOfSkill(pawn, skillDef);
-                SkillRecord skill = pawn.skills.GetSkill(skillDef);
+                int num = FinalLevelOfSkill(clonePawn, skillDef);
+                SkillRecord skill = clonePawn.skills.GetSkill(skillDef);
                 skill.Level = num;
                 if (!skill.TotallyDisabled)
                 {
@@ -649,10 +651,10 @@ namespace RW_CrazyClones
 
         public static void GiveAppropriateBioAndNameTo(Pawn donorPawn, Pawn pawn, string requiredLastName)
         {
-          if ((Rand.Value < 0.25f || pawn.kindDef.factionLeader) && TryGiveSolidBioTo(pawn, requiredLastName))
-          {
-              return;
-          }
+            if ((Rand.Value < 0.25f || pawn.kindDef.factionLeader) && TryGiveSolidBioTo(pawn, requiredLastName))
+            {
+                return;
+            }
             GiveShuffledBioTo(donorPawn, pawn, pawn.Faction.def, requiredLastName);
         }
 
@@ -660,7 +662,7 @@ namespace RW_CrazyClones
         private static void GiveShuffledBioTo(Pawn donorPawn, Pawn clonePawn, FactionDef factionType, string requiredLastName)
         {
             // To do: proper clonePawn names
-             PawnBioAndNameGenerator.GeneratePawnName(clonePawn, NameStyle.Full, requiredLastName);
+            PawnBioAndNameGenerator.GeneratePawnName(clonePawn, NameStyle.Full, requiredLastName);
 
             SetBackstoryInSlot(clonePawn, BackstorySlot.Childhood, ref clonePawn.story.childhood, factionType);
             if (clonePawn.ageTracker.AgeBiologicalYearsFloat >= 20f)

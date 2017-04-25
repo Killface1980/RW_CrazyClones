@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using RimWorld;
-using RW_FacialStuff;
 using Verse;
 
 namespace RW_CrazyClones
@@ -29,26 +28,28 @@ namespace RW_CrazyClones
                 });
                 donorPawn.health.AddHediff(recipe.addsHediff, part, null);
                 donorPawn.health.DropBloodFilth();
-                DNA_Blueprint dnaBlueprint = ThingMaker.MakeThing(ThingDef.Named("CCBloodBag")) as CCBloodBag;
+                DNA_Blueprint dnaBlueprint = ThingMaker.MakeThing(ThingDef.Named("CCBloodBag")) as DNA_Blueprint;
                 if (dnaBlueprint != null)
                 {
                     dnaBlueprint.donorPawn = donorPawn;
-                    dnaBlueprint.pawnKind = donorPawn.kindDef;
+                    dnaBlueprint.gender = donorPawn.gender;
+                    dnaBlueprint.kindDef = donorPawn.kindDef;
                     dnaBlueprint.melanin = donorPawn.story.melanin;
                     dnaBlueprint.crownType = donorPawn.story.crownType;
-                    dnaBlueprint.Name = donorPawn.Name;
+                    dnaBlueprint.nameInt = donorPawn.Name;
                     dnaBlueprint.hairColor = donorPawn.story.hairColor;
                     dnaBlueprint.traits = donorPawn.story.traits;
                     dnaBlueprint.childhood = donorPawn.story.childhood;
                     dnaBlueprint.adulthood = donorPawn.story.adulthood;
                     dnaBlueprint.hairDef = donorPawn.story.hairDef;
-                    dnaBlueprint.skills = donorPawn.skills;
+                    dnaBlueprint.skills = donorPawn.skills.skills;
                     dnaBlueprint.AgeBiologicalTicks = donorPawn.ageTracker.AgeBiologicalTicks;
                     dnaBlueprint.AgeChronologicalTicks = donorPawn.ageTracker.AgeChronologicalTicks;
 
                     //FS
                     if (donorPawn.RaceProps.Humanlike)
                     {
+#if FS
                         CompFace faceComp = donorPawn.TryGetComp<CompFace>();
                         if (faceComp != null)
                         {
@@ -64,6 +65,7 @@ namespace RW_CrazyClones
                             dnaBlueprint.optimized = faceComp.optimized;
                             dnaBlueprint.drawMouth = faceComp.drawMouth;
                         }
+#endif
                     }
 
                     GenSpawn.Spawn(dnaBlueprint, billDoer.Position, billDoer.Map);

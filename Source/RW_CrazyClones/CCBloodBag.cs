@@ -10,9 +10,6 @@ namespace RW_CrazyClones
 {
     public class CCBloodBag : DNA_Blueprint
     {
-        public override string Label
-        {
-            get { return base.Label + " " + donorPawn.Name; }
-        }
+
     }
 }
