@@ -32,23 +32,24 @@ namespace RW_CrazyClones
                 if (dnaBlueprint != null)
                 {
                     dnaBlueprint.donorPawn = donorPawn;
+                    dnaBlueprint.nameInt = donorPawn.Name;
                     dnaBlueprint.gender = donorPawn.gender;
                     dnaBlueprint.kindDef = donorPawn.kindDef;
-                    dnaBlueprint.melanin = donorPawn.story.melanin;
-                    dnaBlueprint.crownType = donorPawn.story.crownType;
-                    dnaBlueprint.nameInt = donorPawn.Name;
-                    dnaBlueprint.hairColor = donorPawn.story.hairColor;
-                    dnaBlueprint.traits = donorPawn.story.traits;
-                    dnaBlueprint.childhood = donorPawn.story.childhood;
-                    dnaBlueprint.adulthood = donorPawn.story.adulthood;
-                    dnaBlueprint.hairDef = donorPawn.story.hairDef;
-                    dnaBlueprint.skills = donorPawn.skills.skills;
                     dnaBlueprint.AgeBiologicalTicks = donorPawn.ageTracker.AgeBiologicalTicks;
                     dnaBlueprint.AgeChronologicalTicks = donorPawn.ageTracker.AgeChronologicalTicks;
 
                     //FS
                     if (donorPawn.RaceProps.Humanlike)
                     {
+                        dnaBlueprint.hairColor = donorPawn.story.hairColor;
+                        dnaBlueprint.melanin = donorPawn.story.melanin;
+                        dnaBlueprint.crownType = donorPawn.story.crownType;
+                        dnaBlueprint.childhood = donorPawn.story.childhood;
+                        dnaBlueprint.adulthood = donorPawn.story.adulthood;
+                        dnaBlueprint.traits = donorPawn.story.traits;
+                        dnaBlueprint.hairDef = donorPawn.story.hairDef;
+                        dnaBlueprint.skills = donorPawn.skills.skills;
+
 #if FS
                         CompFace faceComp = donorPawn.TryGetComp<CompFace>();
                         if (faceComp != null)

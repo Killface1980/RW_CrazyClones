@@ -147,12 +147,15 @@ namespace RW_CrazyClones
             Pawn result;
             try
             {
-                clonePawn.kindDef = request.KindDef;
+                clonePawn.kindDef = dnaBlueprint.kindDef;
                 clonePawn.SetFactionDirect(request.Faction);
                 PawnComponentsUtility.CreateInitialComponents(clonePawn);
 
                 // Gender
-                clonePawn.gender = dnaBlueprint.gender;
+                if (clonePawn.RaceProps.hasGenders)
+                    clonePawn.gender = dnaBlueprint.gender;
+                else
+                    clonePawn.gender = Gender.None;
                 //if (request.FixedGender.HasValue)
                 //{
                 //    clonePawn.gender = request.FixedGender.Value;
@@ -180,6 +183,7 @@ namespace RW_CrazyClones
                 {
                     GenerateClonePawnRelations(dnaBlueprint.donorPawn, clonePawn, ref request);
                 }
+                clonePawn.Name = dnaBlueprint.nameInt;
                 if (clonePawn.RaceProps.Humanlike)
                 {
                     clonePawn.story.melanin = dnaBlueprint.melanin;// ((!request.FixedMelanin.HasValue) ? PawnSkinColors.RandomMelanin() : request.FixedMelanin.Value);
@@ -188,7 +192,6 @@ namespace RW_CrazyClones
                     //  PawnHairColors.RandomHairColor(clonePawn.story.SkinColor, clonePawn.ageTracker.AgeBiologicalYears);
                     //to do: Bio
                     //GiveAppropriateBioAndNameTo(pawnDna, clonePawn, request.FixedLastName);
-                    clonePawn.Name = dnaBlueprint.nameInt;
 
                     // backstories not working!
                     // clonePawn.story.childhood = BackstoryDatabase.allBackstories["CC_VatGrownClone"];
@@ -219,7 +222,7 @@ namespace RW_CrazyClones
 #endif
                     PassTraitsFromDonor(dnaBlueprint, clonePawn);
                     GenerateBodyType(dnaBlueprint, clonePawn);
-               //     clonePawn.skills.skills = dnaBlueprint.skills;
+                    //     clonePawn.skills.skills = dnaBlueprint.skills;
                     GenerateSkills(dnaBlueprint, clonePawn);
                 }
                 //To Do: Rewrite
@@ -309,21 +312,6 @@ namespace RW_CrazyClones
             }
         }
 
-        private static float ChanceToRedressAnyWorldPawn()
-        {
-            int pawnsBySituationCount = Find.WorldPawns.GetPawnsBySituationCount(WorldPawnSituation.Free);
-            return Mathf.Min(0.02f + 0.01f * ((float)pawnsBySituationCount / 25f), 0.8f);
-        }
-
-        private static float WorldPawnSelectionWeight(Pawn p)
-        {
-            if (p.RaceProps.IsFlesh && !p.relations.everSeenByPlayer && p.relations.RelatedToAnyoneOrAnyoneRelatedToMe)
-            {
-                return 0.1f;
-            }
-            return 1f;
-        }
-
         private static void GenerateInitialHediffs(Pawn pawn, PawnGenerationRequest request)
         {
             int num = 0;
@@ -397,23 +385,14 @@ namespace RW_CrazyClones
             }
         }
 
-        private static void GenerateSkills(DNA_Blueprint donorPawn, Pawn clonePawn)
+        private static void GenerateSkills(DNA_Blueprint dna, Pawn clonePawn)
         {
-            foreach (var Cloneskill in donorPawn.skills)
-            {
-                SkillRecord skill = clonePawn.skills.GetSkill(Cloneskill.def);
-                skill.Level = Cloneskill.Level;
-                if (!skill.TotallyDisabled)
-                    skill.passion = Cloneskill.passion;
-                skill.xpSinceLastLevel = Cloneskill.xpSinceLastLevel;
-
-            }
-            return;
+            // To do: skills not usable after saving
 
             List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-            for (int i = 0; i < allDefsListForReading.Count; i++)
+
+            foreach (SkillDef skillDef in allDefsListForReading)
             {
-                SkillDef skillDef = allDefsListForReading[i];
                 int num = FinalLevelOfSkill(clonePawn, skillDef);
                 SkillRecord skill = clonePawn.skills.GetSkill(skillDef);
                 skill.Level = num;
@@ -435,18 +414,20 @@ namespace RW_CrazyClones
                     skill.xpSinceLastLevel = Rand.Range(skill.XpRequiredForLevelUp * 0.1f, skill.XpRequiredForLevelUp * 0.9f);
                 }
             }
+            //   clonePawn.skills.skills = dna.skills;
+
         }
 
         private static int FinalLevelOfSkill(Pawn pawn, SkillDef sk)
         {
-            float num;
+            float skillPercent;
             if (sk.usuallyDefinedInBackstories)
             {
-                num = (float)Rand.RangeInclusive(0, 4);
+                skillPercent = (float)Rand.RangeInclusive(0, 4);
             }
             else
             {
-                num = Rand.ByCurve(LevelRandomCurve, 100);
+                skillPercent = Rand.ByCurve(LevelRandomCurve, 100);
             }
             foreach (Backstory current in from bs in pawn.story.AllBackstories
                                           where bs != null
@@ -456,7 +437,7 @@ namespace RW_CrazyClones
                 {
                     if (current2.Key == sk)
                     {
-                        num += (float)current2.Value * Rand.Range(1f, 1.4f);
+                        skillPercent += (float)current2.Value * Rand.Range(1f, 1.4f);
                     }
                 }
             }
@@ -465,13 +446,13 @@ namespace RW_CrazyClones
                 int num2 = 0;
                 if (pawn.story.traits.allTraits[i].CurrentData.skillGains.TryGetValue(sk, out num2))
                 {
-                    num += (float)num2;
+                    skillPercent += (float)num2;
                 }
             }
             float num3 = Rand.Range(1f, AgeSkillMaxFactorCurve.Evaluate((float)pawn.ageTracker.AgeBiologicalYears));
-            num *= num3;
-            num = LevelFinalAdjustmentCurve.Evaluate(num);
-            return Mathf.Clamp(Mathf.RoundToInt(num), 0, 20);
+            skillPercent *= num3;
+            skillPercent = LevelFinalAdjustmentCurve.Evaluate(skillPercent);
+            return Mathf.Clamp(Mathf.RoundToInt(skillPercent), 0, 20);
         }
 
         public static void PostProcessGeneratedGear(Thing gear, Pawn pawn)

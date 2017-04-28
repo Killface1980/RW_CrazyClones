@@ -117,7 +117,9 @@ namespace RW_CrazyClones
         {
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
-            GUILayout.Label(bloodbag.nameInt.ToStringFull);
+                GUILayout.Label(bloodbag.nameInt.ToStringFull);
+
+
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
             bloodbag.amountToClone = (int)GUILayout.HorizontalSlider(bloodbag.amountToClone, 0, 10);
