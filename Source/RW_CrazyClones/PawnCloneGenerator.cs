@@ -393,25 +393,29 @@ namespace RW_CrazyClones
 
             foreach (SkillDef skillDef in allDefsListForReading)
             {
-                int num = FinalLevelOfSkill(clonePawn, skillDef);
+                SkillRecord clonesource = dna.skills.Find(x => x.def == skillDef);
+
+                int finalLevelOfSkill = clonesource.levelInt;// FinalLevelOfSkill(clonePawn, skillDef);
                 SkillRecord skill = clonePawn.skills.GetSkill(skillDef);
-                skill.Level = num;
+                skill.Level = finalLevelOfSkill;
                 if (!skill.TotallyDisabled)
                 {
-                    float num2 = (float)num * 0.11f;
-                    float value = Rand.Value;
-                    if (value < num2)
-                    {
-                        if (value < num2 * 0.2f)
-                        {
-                            skill.passion = Passion.Major;
-                        }
-                        else
-                        {
-                            skill.passion = Passion.Minor;
-                        }
-                    }
-                    skill.xpSinceLastLevel = Rand.Range(skill.XpRequiredForLevelUp * 0.1f, skill.XpRequiredForLevelUp * 0.9f);
+                    skill.passion = clonesource.passion;
+                    skill.xpSinceLastLevel = clonesource.xpSinceLastLevel;
+                  //float num2 = (float)finalLevelOfSkill * 0.11f;
+                  //float value = Rand.Value;
+                  //if (value < num2)
+                  //{
+                  //    if (value < num2 * 0.2f)
+                  //    {
+                  //        skill.passion = Passion.Major;
+                  //    }
+                  //    else
+                  //    {
+                  //        skill.passion = Passion.Minor;
+                  //    }
+                  //}
+                  //skill.xpSinceLastLevel = Rand.Range(skill.XpRequiredForLevelUp * 0.1f, skill.XpRequiredForLevelUp * 0.9f);
                 }
             }
             //   clonePawn.skills.skills = dna.skills;
