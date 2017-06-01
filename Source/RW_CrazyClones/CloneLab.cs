@@ -8,9 +8,9 @@ namespace RW_CrazyClones
     class CloneLab : Building
     {
 
-        public override void SpawnSetup(Map map)
+        public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
-            base.SpawnSetup(map);
+            base.SpawnSetup(map, respawningAfterLoad);
 
         }
 
@@ -47,13 +47,13 @@ namespace RW_CrazyClones
                 {
                     // IntVec3 InteractionSquare = (this.Position + new IntVec3(0, 0, 1)).RotatedBy(this.Rotation);
                     Job FaceStyleChanger = new Job(DefDatabase<JobDef>.GetNamed("ClonePawnAtCloneLab"), this, InteractionCell);
-                    if (myPawn.jobs.CanTakeOrderedJob())//This is used to force go job, it will work even when drafted
+                    if (myPawn.jobs.IsCurrentJobPlayerInterruptible())//This is used to force go job, it will work even when drafted
                     {
                         myPawn.jobs.TryTakeOrderedJob(FaceStyleChanger);
                     }
                     else
                     {
-                        myPawn.QueueJob(FaceStyleChanger);
+                        myPawn.jobs.jobQueue.EnqueueFirst(FaceStyleChanger);
                         myPawn.jobs.StopAll();
                     }
 

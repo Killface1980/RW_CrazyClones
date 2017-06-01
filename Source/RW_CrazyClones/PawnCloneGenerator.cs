@@ -312,43 +312,6 @@ namespace RW_CrazyClones
             }
         }
 
-        private static void GenerateInitialHediffs(Pawn pawn, PawnGenerationRequest request)
-        {
-            int num = 0;
-            while (true)
-            {
-                GenerateRandomOldAgeInjuries(pawn, !request.AllowDead);
-                PawnTechHediffsGenerator.GeneratePartsAndImplantsFor(pawn);
-                PawnAddictionHediffsGenerator.GenerateAddictionsFor(pawn);
-                if (request.AllowDead && pawn.Dead)
-                {
-                    break;
-                }
-                if (request.AllowDowned || !pawn.Downed)
-                {
-                    return;
-                }
-                pawn.health.Reset();
-                num++;
-                if (num > 80)
-                {
-                    goto Block_4;
-                }
-            }
-            return;
-            Block_4:
-            Log.Warning(string.Concat(new object[]
-            {
-                "Could not generate old age injuries for ",
-                pawn.ThingID,
-                " of age ",
-                pawn.ageTracker.AgeBiologicalYears,
-                " that allow clonePawn to move after ",
-                80,
-                " tries. request=",
-                request
-            }));
-        }
 
         private static void GenerateExactCloneAge(Pawn clonePawn, DNA_Blueprint donorDNA)
         {
@@ -543,56 +506,11 @@ namespace RW_CrazyClones
         }
         // Imported
 
-        public static void GenerateRandomOldAgeInjuries(Pawn pawn, bool tryNotToKillPawn)
-        {
-            int num = 0;
-            for (int i = 10; i < Mathf.Min(pawn.ageTracker.AgeBiologicalYears, 120); i += 10)
-            {
-                if (Rand.Value < 0.15f)
-                {
-                    num++;
-                }
-            }
-            for (int j = 0; j < num; j++)
-            {
-                DamageDef dam = RandomOldInjuryDamageType();
-                int num2 = Rand.RangeInclusive(2, 6);
-                IEnumerable<BodyPartRecord> source = from x in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined)
-                                                     where x.depth == BodyPartDepth.Outside && !Mathf.Approximately(x.def.oldInjuryBaseChance, 0f) && !pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(x)
-                                                     select x;
-                if (source.Any<BodyPartRecord>())
-                {
-                    BodyPartRecord bodyPartRecord = source.RandomElementByWeight((BodyPartRecord x) => x.absoluteFleshCoverage);
-                    HediffDef hediffDefFromDamage = HealthUtility.GetHediffDefFromDamage(dam, pawn, bodyPartRecord);
-                    if (bodyPartRecord.def.oldInjuryBaseChance > 0f && hediffDefFromDamage.CompPropsFor(typeof(HediffComp_GetsOld)) != null)
-                    {
-                        Hediff_Injury hediff_Injury = (Hediff_Injury)HediffMaker.MakeHediff(hediffDefFromDamage, pawn, null);
-                        hediff_Injury.Severity = (float)num2;
-                        hediff_Injury.TryGetComp<HediffComp_GetsOld>().IsOld = true;
-                        pawn.health.AddHediff(hediff_Injury, bodyPartRecord, null);
-                    }
-                }
-            }
-            for (int k = 1; k < pawn.ageTracker.AgeBiologicalYears; k++)
-            {
-                foreach (HediffGiver_Birthday current in RandomHediffsToGainOnBirthday(pawn, k))
-                {
-                    current.TryApplyAndSimulateSeverityChange(pawn, (float)k, tryNotToKillPawn);
-                    if (pawn.Dead)
-                    {
-                        break;
-                    }
-                }
-                if (pawn.Dead)
-                {
-                    break;
-                }
-            }
-        }
         public static IEnumerable<HediffGiver_Birthday> RandomHediffsToGainOnBirthday(Pawn pawn, int age)
         {
             return RandomHediffsToGainOnBirthday(pawn.def, age);
         }
+
         private static IEnumerable<HediffGiver_Birthday> RandomHediffsToGainOnBirthday(ThingDef raceDef, int age)
         {
             List<HediffGiverSetDef> sets = raceDef.race.hediffGiverSets;

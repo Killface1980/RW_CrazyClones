@@ -28,8 +28,10 @@ namespace RW_CrazyClones
         public Backstory adulthood;
         public HairDef hairDef;
         public List<SkillRecord> skills = new List<SkillRecord>();
+
 #if FS
-        //FS
+
+// FS
         public BeardDef BeardDef;
         public EyeDef EyeDef;
         public BrowDef BrowDef;
@@ -50,42 +52,43 @@ namespace RW_CrazyClones
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Defs.LookDef<PawnKindDef>(ref kindDef, "kindDef");
-            Scribe_Values.LookValue<Gender>(ref gender, "gender", Gender.Male, false);
-            Scribe_Deep.LookDeep<Name>(ref nameInt, "name", new object[0]);
+            Scribe_Defs.Look(ref kindDef, "kindDef");
+            Scribe_Values.Look(ref gender, "gender", Gender.Male, false);
+            Scribe_Deep.Look(ref nameInt, "name", new object[0]);
 
-            Scribe_Collections.LookList<SkillRecord>(ref skills, "skills", LookMode.Deep, new object[0]);
+            Scribe_Collections.Look(ref skills, "skills", LookMode.Deep, new object[0]);
 
             string text = (this.childhood == null) ? null : this.childhood.identifier;
-            Scribe_Values.LookValue<string>(ref text, "childhood", null, false);
+            Scribe_Values.Look(ref text, "childhood", null, false);
             if (Scribe.mode == LoadSaveMode.LoadingVars && !text.NullOrEmpty() && !BackstoryDatabase.TryGetWithIdentifier(text, out this.childhood))
             {
                 Log.Error("Couldn't load child backstory with identifier " + text + ". Giving random.");
                 this.childhood = BackstoryDatabase.RandomBackstory(BackstorySlot.Childhood);
             }
+
             string text2 = (this.adulthood == null) ? null : this.adulthood.identifier;
-            Scribe_Values.LookValue<string>(ref text2, "adulthood", null, false);
+            Scribe_Values.Look(ref text2, "adulthood", null, false);
             if (Scribe.mode == LoadSaveMode.LoadingVars && !text2.NullOrEmpty() && !BackstoryDatabase.TryGetWithIdentifier(text2, out this.adulthood))
             {
                 Log.Error("Couldn't load adult backstory with identifier " + text2 + ". Giving random.");
                 this.adulthood = BackstoryDatabase.RandomBackstory(BackstorySlot.Adulthood);
             }
 
-            Scribe_Values.LookValue<CrownType>(ref this.crownType, "crownType", CrownType.Undefined, false);
-            Scribe_Defs.LookDef<HairDef>(ref this.hairDef, "hairDef");
-            Scribe_Values.LookValue<Color>(ref this.hairColor, "hairColor", default(Color), false);
-            Scribe_Values.LookValue<float>(ref this.melanin, "melanin", 0f, false);
-            Scribe_Deep.LookDeep<TraitSet>(ref this.traits, "traits", new object[]
+            Scribe_Values.Look(ref this.crownType, "crownType", CrownType.Undefined, false);
+            Scribe_Defs.Look(ref this.hairDef, "hairDef");
+            Scribe_Values.Look(ref this.hairColor, "hairColor", default(Color), false);
+            Scribe_Values.Look(ref this.melanin, "melanin", 0f, false);
+            Scribe_Deep.Look(ref this.traits, "traits", new object[]
             {
         this.donorPawn
             });
-            Scribe_References.LookReference<Pawn>(ref donorPawn, "donorPawn", true);
-            Scribe_Values.LookValue(ref AgeChronologicalTicks, "AgeChronologicalTicks");
-            Scribe_Values.LookValue(ref AgeBiologicalTicks, "AgeBiologicalTicks");
-
+            Scribe_References.Look(ref donorPawn, "donorPawn", true);
+            Scribe_Values.Look(ref AgeChronologicalTicks, "AgeChronologicalTicks");
+            Scribe_Values.Look(ref AgeBiologicalTicks, "AgeBiologicalTicks");
 
 #if FS
-            // FS
+
+// FS
             Scribe_Defs.LookDef(ref EyeDef, "EyeDef");
             Scribe_Defs.LookDef(ref BrowDef, "BrowDef");
             Scribe_Defs.LookDef(ref MouthDef, "MouthDef");
